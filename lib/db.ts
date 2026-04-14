@@ -10,9 +10,13 @@ declare global {
 function createPool() {
   const connectionString = process.env.DATABASE_URL;
   if (!connectionString) throw new Error('DATABASE_URL is required');
+
+  const sslEnv = String(process.env.DATABASE_SSL || '').toLowerCase();
+  const useSsl = sslEnv === '1' || sslEnv === 'true' || sslEnv === 'require';
+
   return new Pool({
     connectionString,
-    ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
+    ssl: useSsl ? { rejectUnauthorized: false } : false,
     max: 10,
     idleTimeoutMillis: 30_000,
   });
