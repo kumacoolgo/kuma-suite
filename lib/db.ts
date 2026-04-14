@@ -134,7 +134,10 @@ export async function ensureSchema() {
       } finally {
         client.release();
       }
-    })();
+    })().catch((err) => {
+      global.__kumaSchemaReady = undefined;
+      throw err;
+    });
   }
   return global.__kumaSchemaReady;
 }
@@ -142,4 +145,24 @@ export async function ensureSchema() {
 export async function dbQuery(text: string, values: any[] = []) {
   await ensureSchema();
   return pool().query(text, values);
+}
+
+export async function dbTransaction<T>(fn: (client: PoolClient) => Promise<T>): Promise<T> {
+  await ensureSchema();
+  const client = await pool().connect();
+  try {
+    await client.query('BEGIN');
+    const result = await fn(client);
+    await client.query('COMMIT');
+    return result;
+  } catch (err) {
+    try {
+      await client.query('ROLLBACK');
+    } catch {
+      // ignore rollback errors
+    }
+    throw err;
+  } finally {
+    client.release();
+  }
 }

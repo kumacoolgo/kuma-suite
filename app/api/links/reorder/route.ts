@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { dbQuery } from '@/lib/db';
+import { dbTransaction } from '@/lib/db';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -8,14 +8,18 @@ export async function POST(req: Request) {
   const { id, direction } = await req.json();
   if (!id || !['up', 'down'].includes(direction)) return NextResponse.json({ error: 'bad request' }, { status: 400 });
 
-  const { rows } = await dbQuery('SELECT id, sort_order FROM app_links ORDER BY sort_order ASC, created_at ASC');
-  const idx = rows.findIndex((row: any) => row.id === id);
-  if (idx < 0) return NextResponse.json({ error: 'not found' }, { status: 404 });
-  const nextIdx = direction === 'up' ? idx - 1 : idx + 1;
-  if (nextIdx < 0 || nextIdx >= rows.length) return NextResponse.json({ ok: true });
-  const a = rows[idx];
-  const b = rows[nextIdx];
-  await dbQuery('UPDATE app_links SET sort_order = $1 WHERE id = $2', [b.sort_order, a.id]);
-  await dbQuery('UPDATE app_links SET sort_order = $1 WHERE id = $2', [a.sort_order, b.id]);
-  return NextResponse.json({ ok: true });
+  const result = await dbTransaction(async (client) => {
+    const { rows } = await client.query('SELECT id, sort_order FROM app_links ORDER BY sort_order ASC, created_at ASC FOR UPDATE');
+    const idx = rows.findIndex((row: any) => row.id === id);
+    if (idx < 0) return { status: 404 as const, body: { error: 'not found' } };
+    const nextIdx = direction === 'up' ? idx - 1 : idx + 1;
+    if (nextIdx < 0 || nextIdx >= rows.length) return { status: 200 as const, body: { ok: true } };
+    const a = rows[idx];
+    const b = rows[nextIdx];
+    await client.query('UPDATE app_links SET sort_order = $1 WHERE id = $2', [b.sort_order, a.id]);
+    await client.query('UPDATE app_links SET sort_order = $1 WHERE id = $2', [a.sort_order, b.id]);
+    return { status: 200 as const, body: { ok: true } };
+  });
+
+  return NextResponse.json(result.body, { status: result.status });
 }
