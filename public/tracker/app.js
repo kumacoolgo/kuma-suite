@@ -46,7 +46,7 @@ async function api(method, path, body) {
 
 async function loadTasks() {
     try {
-        tasks = await api("GET", "/tasks");
+        tasks = await api("GET", "");
         selectedId = null;
         updateReorderButtons();
         renderGrid();
@@ -257,7 +257,7 @@ btnDelete.addEventListener("click", async () => {
     if (!selectedId) return;
     if (!confirm("删除这条记录？")) return;
     try {
-        await api("DELETE", `/tasks/${selectedId}`);
+        await api("DELETE", `/${selectedId}`);
         selectedId = null;
         await loadTasks();
         showStatus("已删除");
@@ -328,10 +328,10 @@ taskForm.addEventListener("submit", async (e) => {
 
     try {
         if (id) {
-            await api("PUT", `/tasks/${id}`, payload);
+            await api("PUT", `/${id}`, payload);
             showStatus("已更新");
         } else {
-            await api("POST", "/tasks", payload);
+            await api("POST", "", payload);
             showStatus("已创建");
         }
         closeEditModal();
