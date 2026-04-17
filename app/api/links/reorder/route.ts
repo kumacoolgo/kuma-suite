@@ -1,10 +1,11 @@
 import { NextResponse } from 'next/server';
 import { dbTransaction } from '@/lib/db';
+import { withErrorHandler } from '@/lib/api-handler';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
-export async function POST(req: Request) {
+export const POST = withErrorHandler(async (req: Request) => {
   const { id, direction } = await req.json();
   if (!id || !['up', 'down'].includes(direction)) return NextResponse.json({ error: 'bad request' }, { status: 400 });
 
@@ -22,4 +23,4 @@ export async function POST(req: Request) {
   });
 
   return NextResponse.json(result.body, { status: result.status });
-}
+});

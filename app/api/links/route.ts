@@ -1,11 +1,12 @@
 import { NextResponse } from 'next/server';
 import { nanoid } from 'nanoid';
 import { dbTransaction } from '@/lib/db';
+import { withErrorHandler } from '@/lib/api-handler';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
-export async function POST(req: Request) {
+export const POST = withErrorHandler(async (req: Request) => {
   const body = await req.json();
   const title = String(body.title ?? '').trim();
   const url = String(body.url ?? '').trim();
@@ -27,4 +28,4 @@ export async function POST(req: Request) {
   });
 
   return NextResponse.json(item);
-}
+});

@@ -2,16 +2,17 @@ import { NextResponse } from 'next/server';
 import { nanoid } from 'nanoid';
 import { dbQuery, dbTransaction } from '@/lib/db';
 import { normalizeTimelineItem, sanitizeTimelineRow } from '@/lib/timeline-normalize';
+import { withErrorHandler } from '@/lib/api-handler';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
-export async function GET() {
+export const GET = withErrorHandler(async () => {
   const { rows } = await dbQuery('SELECT * FROM timeline_items ORDER BY sort_order ASC, created_at ASC');
   return NextResponse.json({ items: rows.map(sanitizeTimelineRow) });
-}
+});
 
-export async function POST(req: Request) {
+export const POST = withErrorHandler(async (req: Request) => {
   const rawBody = await req.json();
   const norm = normalizeTimelineItem({ id: rawBody.id, ...rawBody }, true);
   if (!norm.name || !norm.start_date || !norm.type) return NextResponse.json({ error: 'missing required fields' }, { status: 400 });
@@ -56,4 +57,4 @@ export async function POST(req: Request) {
   });
 
   return NextResponse.json({ item: sanitizeTimelineRow(item) });
-}
+});

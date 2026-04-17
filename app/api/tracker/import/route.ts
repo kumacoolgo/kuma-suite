@@ -5,10 +5,13 @@ import { dbTransaction } from '@/lib/db';
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
+const MAX_IMPORT_SIZE = 5 * 1024 * 1024; // 5 MB
+
 export async function POST(req: Request) {
   const form = await req.formData();
   const file = form.get('file');
   if (!(file instanceof File)) return NextResponse.json({ error: 'file required' }, { status: 400 });
+  if (file.size > MAX_IMPORT_SIZE) return NextResponse.json({ error: 'file too large (max 5 MB)' }, { status: 413 });
 
   const buffer = Buffer.from(await file.arrayBuffer());
   const wb = XLSX.read(buffer, { type: 'buffer' });

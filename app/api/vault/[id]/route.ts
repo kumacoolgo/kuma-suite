@@ -1,11 +1,12 @@
 import { NextResponse } from 'next/server';
 import { dbQuery } from '@/lib/db';
 import { decryptSecret, encryptSecret } from '@/lib/vault-crypto';
+import { withErrorHandler } from '@/lib/api-handler';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
-export async function PUT(req: Request, ctx: any) {
+export const PUT = withErrorHandler(async (req: Request, ctx: any) => {
   const { id } = await Promise.resolve(ctx.params);
   const body = await req.json();
   const { rows: currentRows } = await dbQuery('SELECT * FROM vault_items WHERE id = $1', [id]);
@@ -31,10 +32,10 @@ export async function PUT(req: Request, ctx: any) {
   );
   const item = rows[0];
   return NextResponse.json({ item: { ...item, password } });
-}
+});
 
-export async function DELETE(_req: Request, ctx: any) {
+export const DELETE = withErrorHandler(async (_req: Request, ctx: any) => {
   const { id } = await Promise.resolve(ctx.params);
   await dbQuery('DELETE FROM vault_items WHERE id = $1', [id]);
   return NextResponse.json({ ok: true });
-}
+});

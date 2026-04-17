@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { dbQuery } from '@/lib/db';
+import { withErrorHandler } from '@/lib/api-handler';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -14,7 +15,7 @@ async function getLinks() {
   return rows;
 }
 
-export async function GET() {
+export const GET = withErrorHandler(async () => {
   const [profile, links] = await Promise.all([getProfile(), getLinks()]);
   return NextResponse.json({ profile, links });
-}
+});

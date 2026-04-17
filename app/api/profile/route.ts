@@ -1,10 +1,11 @@
 import { NextResponse } from 'next/server';
 import { dbQuery } from '@/lib/db';
+import { withErrorHandler } from '@/lib/api-handler';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
-export async function PUT(req: Request) {
+export const PUT = withErrorHandler(async (req: Request) => {
   const body = await req.json();
   const name = String(body.name ?? '').trim() || 'Kuma';
   const bio = String(body.bio ?? '');
@@ -19,4 +20,4 @@ export async function PUT(req: Request) {
     [name, bio, avatarUrl || null, backgroundUrl || null],
   );
   return NextResponse.json(rows[0]);
-}
+});

@@ -1,15 +1,16 @@
 import { NextResponse } from 'next/server';
 import { dbQuery, dbTransaction } from '@/lib/db';
+import { withErrorHandler } from '@/lib/api-handler';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
-export async function GET() {
+export const GET = withErrorHandler(async () => {
   const { rows } = await dbQuery('SELECT * FROM tracker_tasks ORDER BY sort_order ASC, created_at ASC');
   return NextResponse.json({ items: rows });
-}
+});
 
-export async function POST(req: Request) {
+export const POST = withErrorHandler(async (req: Request) => {
   const body = await req.json();
   if (!String(body.test_name || '').trim()) return NextResponse.json({ error: 'test_name required' }, { status: 400 });
   const item = await dbTransaction(async (client) => {
@@ -27,4 +28,4 @@ export async function POST(req: Request) {
     return rows[0];
   });
   return NextResponse.json({ item });
-}
+});

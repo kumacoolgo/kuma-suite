@@ -6,10 +6,13 @@ import { normalizeTimelineItem } from '@/lib/timeline-normalize';
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
+const MAX_IMPORT_SIZE = 5 * 1024 * 1024; // 5 MB
+
 export async function POST(req: Request) {
   const form = await req.formData();
   const file = form.get('file');
   if (!(file instanceof File)) return NextResponse.json({ error: 'file required' }, { status: 400 });
+  if (file.size > MAX_IMPORT_SIZE) return NextResponse.json({ error: 'file too large (max 5 MB)' }, { status: 413 });
 
   let items: any[];
   try {

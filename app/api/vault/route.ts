@@ -2,16 +2,17 @@ import { NextResponse } from 'next/server';
 import { nanoid } from 'nanoid';
 import { dbQuery } from '@/lib/db';
 import { decryptSecret, encryptSecret } from '@/lib/vault-crypto';
+import { withErrorHandler } from '@/lib/api-handler';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
-export async function GET() {
+export const GET = withErrorHandler(async () => {
   const { rows } = await dbQuery('SELECT * FROM vault_items ORDER BY created_at DESC');
   return NextResponse.json({ items: rows.map((row: any) => ({ ...row, password: decryptSecret(row.password) })) });
-}
+});
 
-export async function POST(req: Request) {
+export const POST = withErrorHandler(async (req: Request) => {
   const body = await req.json();
   if (!String(body.url ?? '').trim()) return NextResponse.json({ error: 'url required' }, { status: 400 });
   const id = nanoid();
@@ -33,4 +34,4 @@ export async function POST(req: Request) {
   );
   const item = rows[0];
   return NextResponse.json({ item: { ...item, password } });
-}
+});

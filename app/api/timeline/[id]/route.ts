@@ -1,11 +1,12 @@
 import { NextResponse } from 'next/server';
-import { dbQuery } from '@/lib/db';
+import { dbQuery, dbTransaction } from '@/lib/db';
 import { normalizeTimelineItem, sanitizeTimelineRow } from '@/lib/timeline-normalize';
+import { withErrorHandler } from '@/lib/api-handler';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
-export async function PUT(req: Request, ctx: any) {
+export const PUT = withErrorHandler(async (req: Request, ctx: any) => {
   const { id } = await Promise.resolve(ctx.params);
   const norm = normalizeTimelineItem(await req.json());
   if (!norm.name || !norm.start_date || !norm.type) return NextResponse.json({ error: 'missing required fields' }, { status: 400 });
@@ -35,20 +36,22 @@ export async function PUT(req: Request, ctx: any) {
   );
   if (!rows[0]) return NextResponse.json({ error: 'not found' }, { status: 404 });
   return NextResponse.json({ item: sanitizeTimelineRow(rows[0]) });
-}
+});
 
-export async function DELETE(_req: Request, ctx: any) {
+export const DELETE = withErrorHandler(async (_req: Request, ctx: any) => {
   const { id } = await Promise.resolve(ctx.params);
-  await dbQuery('DELETE FROM timeline_items WHERE id = $1', [id]);
-  await dbQuery(`
-    WITH ordered AS (
-      SELECT id, ROW_NUMBER() OVER (ORDER BY sort_order ASC, created_at ASC) AS rn
-      FROM timeline_items
-    )
-    UPDATE timeline_items AS t
-    SET sort_order = ordered.rn
-    FROM ordered
-    WHERE t.id = ordered.id
-  `);
+  await dbTransaction(async (client) => {
+    await client.query('DELETE FROM timeline_items WHERE id = $1', [id]);
+    await client.query(`
+      WITH ordered AS (
+        SELECT id, ROW_NUMBER() OVER (ORDER BY sort_order ASC, created_at ASC) AS rn
+        FROM timeline_items
+      )
+      UPDATE timeline_items AS t
+      SET sort_order = ordered.rn
+      FROM ordered
+      WHERE t.id = ordered.id
+    `);
+  });
   return NextResponse.json({ ok: true });
-}
+});
