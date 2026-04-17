@@ -54,12 +54,15 @@ export default function VaultPage() {
     setMsg('');
     try {
       const payload = { ...draft };
-      if (selectedId) await apiJson(`/api/vault/${selectedId}`, { method: 'PUT', body: JSON.stringify(payload) });
-      else {
+      let savedId = selectedId;
+      if (selectedId) {
+        await apiJson(`/api/vault/${selectedId}`, { method: 'PUT', body: JSON.stringify(payload) });
+      } else {
         const res = await apiJson<{ item: VaultItem }>('/api/vault', { method: 'POST', body: JSON.stringify(payload) });
-        setSelectedId(res.item.id);
+        savedId = res.item.id;
       }
       await load();
+      setSelectedId(savedId);
       setMsg('已保存');
     } catch (e: any) {
       setMsg(e.message || '保存失败');

@@ -5,7 +5,6 @@ import { usePathname } from 'next/navigation';
 import { useEffect, useMemo, useState } from 'react';
 
 const NAV = [
-  { href: '/', label: 'blog2', hint: '主页' },
   { href: '/tracker', label: 'game-test-tracker', hint: '测试记录' },
   { href: '/timeline', label: 'timeline3', hint: '费用时间轴' },
   { href: '/board', label: 'NullPage', hint: '文本板' },

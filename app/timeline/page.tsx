@@ -1,240 +1,350 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
-import type { TimelineItem } from '@/lib/types';
-import { apiJson, uploadFile } from '@/lib/client';
-import { downloadFile } from '@/components/common';
-import { fmtMoney, fmtDate } from '@/components/common';
-import { nanoid } from 'nanoid';
+import { useEffect, useState, useMemo, useCallback } from 'react';
+import { apiJson } from '@/lib/client';
 
-type Draft = Partial<TimelineItem>;
+type ItemType = 'plan' | 'warranty' | 'insurance';
+type Cycle = 'monthly' | 'yearly';
 
-const emptyDraft: Draft = {
-  type: 'plan',
-  name: '',
-  number: '',
-  start_date: new Date().toISOString().slice(0, 10),
-  currency: 'CNY',
-  category: '',
-  tags: [],
-  billing_day: 1,
-  cycle: 'monthly',
-  fiscal_month: 1,
-  price_phases: [{ fromMonth: 1, amount: 0 }],
-  cancel_windows: [],
-  warranty_months: 24,
-  policy_term_years: 0,
-  policy_term_months: 0,
-  balance: null,
-  balance_from: null,
+interface PricePhase {
+  fromMonth: number;
+  amount: number;
+}
+
+interface CancelWindow {
+  fromMonth: number;
+  toMonth: number;
+}
+
+interface TimelineItem {
+  id: string;
+  type: ItemType;
+  name: string;
+  number?: string;
+  startDate: string;
+  currency: string;
+  category?: string;
+  tags?: string[];
+  warrantyMonths?: number;
+  cycle?: Cycle;
+  fiscalMonth?: number;
+  pricePhases?: PricePhase[];
+  cancelWindows?: CancelWindow[];
+  policyTermYears?: number;
+  policyTermMonths?: number;
+  sortOrder?: number;
+}
+
+const CURRENCY_SYMBOLS: Record<string, string> = {
+  CNY: '￥',
+  JPY: 'JP￥',
+  USD: '$',
+  EUR: '€',
 };
 
-function parseTags(text: string) {
-  return text.split(',').map((s) => s.trim()).filter(Boolean);
+function fmtMoney(amount: number, currency: string = 'CNY'): string {
+  const num = Math.round(amount).toLocaleString('zh-CN', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+  return `${CURRENCY_SYMBOLS[currency] ?? (currency + ' ')} ${num}`;
 }
 
-function makeMonthSeq(startDate: string, count = 12) {
-  const start = new Date(startDate || new Date().toISOString());
-  const arr: { label: string; idx: number }[] = [];
-  for (let i = 0; i < count; i++) {
-    const d = new Date(start.getFullYear(), start.getMonth() + i, 1);
-    arr.push({ label: `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`, idx: i + 1 });
-  }
-  return arr;
+function pad2(n: number): string {
+  return n < 10 ? '0' + n : String(n);
 }
 
-function activePhase(phases: Array<{ fromMonth: number; amount: number }>, idx: number) {
-  let current: number | null = null;
-  for (const phase of [...phases].sort((a, b) => a.fromMonth - b.fromMonth)) {
-    if (idx >= phase.fromMonth) current = phase.amount;
-  }
-  return current;
+function parseISODate(s: string): Date {
+  if (!s) return new Date();
+  const [y, m, d] = s.split('-').map(Number);
+  return new Date(y, m - 1, d);
 }
 
-function Input({ label, value, onChange, type = 'text' }: { label: string; value: any; onChange: (v: string) => void; type?: string }) {
-  return (
-    <label className="stack" style={{ gap: 6 }}>
-      <span className="muted tiny">{label}</span>
-      <input type={type} value={value ?? ''} onChange={(e) => onChange(e.target.value)} />
-    </label>
-  );
+function addMonths(d: Date, n: number): Date {
+  return new Date(d.getFullYear(), d.getMonth() + n, 1);
+}
+
+function resolvePlanPrice(sortedPhases: PricePhase[] | undefined, idx: number): number | null {
+  if (!sortedPhases?.length) return null;
+  let a: number | null = null;
+  sortedPhases.forEach(p => { if (idx >= p.fromMonth) a = p.amount; });
+  return a;
+}
+
+function isInCancel(w: CancelWindow[] | undefined, idx: number): boolean {
+  return w?.some?.(x => idx >= x.fromMonth && idx <= x.toMonth) ?? false;
 }
 
 export default function TimelinePage() {
   const [items, setItems] = useState<TimelineItem[]>([]);
-  const [selectedId, setSelectedId] = useState<string | null>(null);
-  const [draft, setDraft] = useState<Draft>(emptyDraft);
-  const [q, setQ] = useState('');
+  const [activeId, setActiveId] = useState<string | null>(null);
+  const [editingItem, setEditingItem] = useState<TimelineItem | null>(null);
+  const [showDialog, setShowDialog] = useState(false);
+  const [showStats, setShowStats] = useState(false);
+  const [filter, setFilter] = useState('');
   const [msg, setMsg] = useState('');
 
-  async function load() {
-    const data = await apiJson<{ items: TimelineItem[] }>('/api/timeline');
-    setItems(data.items || []);
-    if (data.items?.length && !selectedId) setSelectedId(data.items[0].id);
-    if (!data.items?.length) setSelectedId(null);
-  }
+  const load = useCallback(async () => {
+    try {
+      const data = await apiJson<{ items: TimelineItem[] }>('/api/timeline');
+      setItems(data.items ?? []);
+    } catch (e: any) {
+      setMsg(e.message || '加载失败');
+    }
+  }, []);
 
-  useEffect(() => { load().catch((e) => setMsg(e.message)); }, []);
-  useEffect(() => {
-    const selected = items.find((i) => i.id === selectedId) || null;
-    if (selected) setDraft(selected);
-    else setDraft(emptyDraft);
-  }, [selectedId, items]);
+  useEffect(() => { load(); }, [load]);
 
   const filtered = useMemo(() => {
-    const s = q.trim().toLowerCase();
-    if (!s) return items;
-    return items.filter((it) => [it.name, it.number, it.category, it.type, ...(it.tags || [])].filter(Boolean).join(' ').toLowerCase().includes(s));
-  }, [items, q]);
+    if (!filter) return items;
+    const s = filter.toLowerCase();
+    return items.filter(it => 
+      [it.name, it.type, it.number, it.category, ...(it.tags || [])].filter(Boolean).join(' ').toLowerCase().includes(s)
+    );
+  }, [items, filter]);
 
-  async function save() {
+  const visibleItems = useMemo(() => {
+    return activeId ? filtered.filter(i => i.id === activeId) : (filtered.length ? [filtered[0]] : []);
+  }, [filtered, activeId]);
+
+  const openDialog = (item: TimelineItem | null) => {
+    setEditingItem(item || {
+      id: '',
+      type: 'plan',
+      name: '',
+      startDate: '',
+      currency: 'CNY',
+      pricePhases: [{ fromMonth: 1, amount: 0 }],
+      cancelWindows: [],
+    } as TimelineItem);
+    setShowDialog(true);
+  };
+
+  const closeDialog = () => {
+    setShowDialog(false);
+    setEditingItem(null);
     setMsg('');
+  };
+
+  const saveItem = async () => {
+    if (!editingItem) return;
+    if (!editingItem.name.trim()) {
+      setMsg('请填写项目名称');
+      return;
+    }
+    if (!editingItem.startDate) {
+      setMsg('请选择开始日期');
+      return;
+    }
+
     try {
-      const payload = {
-        ...draft,
-        tags: Array.isArray(draft.tags) ? draft.tags : parseTags(String((draft as any).tags || '')),
-        price_phases: Array.isArray(draft.price_phases) ? draft.price_phases : [{ fromMonth: 1, amount: 0 }],
-        cancel_windows: Array.isArray(draft.cancel_windows) ? draft.cancel_windows : [],
-        id: selectedId || draft.id || nanoid(),
-      };
-      const res = selectedId
-        ? await apiJson<{ item: TimelineItem }>(`/api/timeline/${selectedId}`, {
-            method: 'PUT',
-            body: JSON.stringify(payload),
-          })
-        : await apiJson<{ item: TimelineItem }>('/api/timeline', {
-            method: 'POST',
-            body: JSON.stringify(payload),
-          });
-      setSelectedId(res.item.id);
+      if (editingItem.id) {
+        await apiJson(`/api/timeline/${editingItem.id}`, { method: 'PUT', body: JSON.stringify(editingItem) });
+      } else {
+        await apiJson('/api/timeline', { method: 'POST', body: JSON.stringify(editingItem) });
+      }
       await load();
-      setMsg('已保存');
+      closeDialog();
     } catch (e: any) {
       setMsg(e.message || '保存失败');
     }
-  }
+  };
 
-  async function remove(id: string) {
-    if (!confirm('删除这条项目？')) return;
+  const deleteItem = async (id: string) => {
+    if (!confirm('删除这个项目？')) return;
     await apiJson(`/api/timeline/${id}`, { method: 'DELETE' });
-    if (selectedId === id) setSelectedId(null);
+    if (activeId === id) setActiveId(null);
     await load();
-  }
+  };
 
-  async function exportJson() {
-    const res = await fetch('/api/timeline/export', { credentials: 'include' });
-    if (!res.ok) throw new Error(await res.text());
-    downloadFile('timeline.json', await res.blob());
-  }
-
-  async function importJson(file: File) {
-    await uploadFile('/api/timeline/import', file);
-    await load();
-  }
-
-  const previewMonths = makeMonthSeq(draft.start_date || new Date().toISOString().slice(0, 10), 12);
+  // 生成月份列
+  const months = useMemo(() => {
+    const result: { ym: string; label: string; isToday: boolean }[] = [];
+    const today = new Date();
+    const todayYM = `${today.getFullYear()}-${pad2(today.getMonth() + 1)}`;
+    
+    for (let i = -12; i <= 36; i++) {
+      const d = addMonths(new Date(), i);
+      const ym = `${d.getFullYear()}-${pad2(d.getMonth() + 1)}`;
+      result.push({
+        ym,
+        label: `${d.getFullYear()}/${pad2(d.getMonth() + 1)}`,
+        isToday: ym === todayYM,
+      });
+    }
+    return result;
+  }, []);
 
   return (
-    <div className="page stack">
-      <section className="panel">
-        <div className="panel-head">
-          <h2>费用时间轴</h2>
-          <div className="actions">
-            <input className="" style={{ width: 220 }} value={q} onChange={(e) => setQ(e.target.value)} placeholder="搜索名称 / 分类 / 标签" />
-            <button className="btn" onClick={exportJson}>导出 JSON</button>
-            <label className="btn"><span>导入 JSON</span><input type="file" accept="application/json,.json" hidden onChange={async (e) => { const file = e.target.files?.[0]; if (file) await importJson(file); e.currentTarget.value = ''; }} /></label>
-            <button className="btn primary" onClick={() => { setSelectedId(null); setDraft({ ...emptyDraft, id: nanoid() }); }}>新建</button>
+    <div style={{ maxWidth: 1200, margin: '18px auto', padding: '0 12px' }}>
+      <div style={{ background: '#fff', border: '1px solid #eef0f3', borderRadius: 14, padding: 10, marginBottom: 14 }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 10 }}>
+          <b>费用时间轴</b>
+        </div>
+        <div style={{ display: 'flex', gap: 12, marginBottom: 10, flexWrap: 'wrap' }}>
+          <input
+            style={{ flex: 1, minWidth: 0, border: '1px solid #eef0f3', borderRadius: 10, padding: '8px 10px' }}
+            value={filter}
+            onChange={(e) => setFilter(e.target.value)}
+            placeholder="搜索项目/类型/编号/标签/分类..."
+          />
+          <button style={{ background: '#eceff3', color: '#111827', border: 0, borderRadius: 10, padding: '8px 12px', cursor: 'pointer' }} onClick={() => setFilter('')}>清空</button>
+          <button style={{ background: '#eceff3', color: '#111827', border: 0, borderRadius: 10, padding: '8px 12px', cursor: 'pointer' }} onClick={() => setShowStats(true)}>统计</button>
+        </div>
+        <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
+          <button style={{ flex: 1, background: '#3b82f6', color: '#fff', border: 0, borderRadius: 10, padding: '8px 12px', cursor: 'pointer' }} onClick={() => openDialog(null)}>添加项目</button>
+          <button style={{ background: '#eceff3', color: '#111827', border: 0, borderRadius: 10, padding: '8px 12px', cursor: 'pointer', whiteSpace: 'nowrap' }} onClick={() => activeId && openDialog(items.find(i => i.id === activeId) || null)}>编辑项目</button>
+        </div>
+      </div>
+
+      <div style={{ display: 'grid', gridTemplateColumns: '340px 1fr', gap: 14, alignItems: 'start' }}>
+        <div style={{ background: '#fff', border: '1px solid #eef0f3', borderRadius: 14, padding: 10 }}>
+          <div style={{ maxHeight: 'calc(72px * 4 + 24px)', overflowY: 'auto', paddingTop: 4, paddingLeft: 4, paddingRight: 6 }}>
+            {filtered.map((item) => (
+              <div
+                key={item.id}
+                onClick={() => setActiveId(item.id)}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  padding: '6px 10px',
+                  borderRadius: 12,
+                  border: `1px solid ${activeId === item.id ? '#3b82f6' : '#eef0f3'}`,
+                  background: '#fff',
+                  height: 72,
+                  gap: 8,
+                  marginBottom: 8,
+                  cursor: 'pointer',
+                  outline: activeId === item.id ? '2px solid #3b82f6' : 'none',
+                }}
+              >
+                <div style={{ minWidth: 0 }}>
+                  <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, fontWeight: 600 }}>
+                    <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', minWidth: 0 }}>{item.name}</span>
+                    {item.number && <span style={{ marginLeft: 'auto', flexShrink: 1, fontSize: 12, color: '#667085', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: 140 }}>{item.number}</span>}
+                  </div>
+                  <div style={{ fontSize: 12, color: '#667085', marginTop: 2 }}>
+                    {item.type === 'plan' ? '套餐' : item.type === 'warranty' ? '保修' : '保险'} · {item.startDate}
+                  </div>
+                  {item.category && <div style={{ fontSize: 12, marginTop: 2 }}>{item.category}</div>}
+                </div>
+              </div>
+            ))}
+            {!filtered.length && <div style={{ fontSize: 12, color: '#667085', textAlign: 'center', padding: 20 }}>没有匹配的项目</div>}
           </div>
         </div>
-        <div className="panel-body grid">
-          <div className="stack">
-            <div className="card-list">
-              {filtered.map((item) => (
-                <button key={item.id} className={`card ${selectedId === item.id ? 'active' : ''}`} onClick={() => setSelectedId(item.id)} style={{ textAlign: 'left' }}>
-                  <div className="card-head">
-                    <div>
-                      <div style={{ fontWeight: 800 }}>{item.name}</div>
-                      <div className="muted tiny">{item.type} · {item.category || '未分类'} · {fmtDate(item.start_date)}</div>
-                    </div>
-                    <span className={`badge ${item.type === 'plan' ? '' : item.type === 'warranty' ? 'blue' : 'green'}`}>{item.currency}</span>
-                  </div>
-                  <div className="muted tiny">{(item.tags || []).map((t) => `#${t}`).join(' ') || '无标签'}</div>
-                </button>
+
+        <div style={{ background: '#fff', border: '1px solid #eef0f3', borderRadius: 14, padding: 10, overflowX: 'auto' }}>
+          <div style={{ display: 'grid', gap: 8, marginBottom: 8 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: `repeat(${months.length}, 110px)`, gap: 8 }}>
+              {months.map(m => (
+                <div key={m.ym} style={{ background: m.isToday ? '#eef5ff' : '#fff', border: `1px solid ${m.isToday ? '#dbe8ff' : '#eef0f3'}`, borderRadius: 10, padding: 8, whiteSpace: 'nowrap', fontSize: 12 }}>
+                  {m.label}
+                </div>
               ))}
-              {!filtered.length && <div className="empty">没有匹配的项目。</div>}
             </div>
           </div>
+          <div style={{ display: 'grid', gap: 8 }}>
+            {visibleItems.map(item => {
+              const start = parseISODate(item.startDate);
+              return (
+                <div key={item.id} style={{ display: 'grid', gridTemplateColumns: `repeat(${months.length}, 110px)`, gap: 8 }}>
+                  {months.map((m, idx) => {
+                    const monthDate = parseISODate(m.ym + '-01');
+                    const monthIdx = Math.floor((monthDate.getTime() - start.getTime()) / (1000 * 60 * 60 * 24 * 30)) + 1;
+                    
+                    let content = '';
+                    let bgColor = '#fff';
+                    let borderColor = '#eef0f3';
 
-          <div className="panel" style={{ background: 'rgba(10,15,28,.82)' }}>
-            <div className="panel-head">
-              <h3>{selectedId ? '编辑项目' : '新建项目'}</h3>
-              <div className="actions">
-                {selectedId && <button className="btn danger" onClick={() => remove(selectedId)}>删除</button>}
-                <button className="btn primary" onClick={save}>{selectedId ? '保存' : '创建'}</button>
-              </div>
-            </div>
-            <div className="panel-body stack">
-              <div className="row cols-3">
-                <Input label="类型 (plan/warranty/insurance)" value={draft.type} onChange={(v) => setDraft((d) => ({ ...d, type: v as any }))} />
-                <Input label="名称" value={draft.name} onChange={(v) => setDraft((d) => ({ ...d, name: v }))} />
-                <Input label="编号" value={draft.number} onChange={(v) => setDraft((d) => ({ ...d, number: v }))} />
-              </div>
-              <div className="row cols-3">
-                <Input label="开始日期" type="date" value={draft.start_date} onChange={(v) => setDraft((d) => ({ ...d, start_date: v }))} />
-                <Input label="货币" value={draft.currency} onChange={(v) => setDraft((d) => ({ ...d, currency: v.toUpperCase() }))} />
-                <Input label="分类" value={draft.category} onChange={(v) => setDraft((d) => ({ ...d, category: v }))} />
-              </div>
-              <div className="row cols-2">
-                <Input label="标签（逗号分隔）" value={(draft.tags || []).join(', ')} onChange={(v) => setDraft((d) => ({ ...d, tags: parseTags(v) }))} />
-                <Input label="金额基准 / 余额" value={draft.balance ?? ''} onChange={(v) => setDraft((d) => ({ ...d, balance: v === '' ? null : Number(v) }))} type="number" />
-              </div>
-              <div className="row cols-3">
-                <Input label="billing day" value={draft.billing_day ?? ''} onChange={(v) => setDraft((d) => ({ ...d, billing_day: v === '' ? null : Number(v) }))} type="number" />
-                <Input label="cycle" value={draft.cycle} onChange={(v) => setDraft((d) => ({ ...d, cycle: v === 'yearly' ? 'yearly' : 'monthly' }))} />
-                <Input label="fiscal month" value={draft.fiscal_month ?? ''} onChange={(v) => setDraft((d) => ({ ...d, fiscal_month: v === '' ? null : Number(v) }))} type="number" />
-              </div>
-              <div className="row cols-3">
-                <Input label="warranty months" value={draft.warranty_months ?? ''} onChange={(v) => setDraft((d) => ({ ...d, warranty_months: v === '' ? null : Number(v) }))} type="number" />
-                <Input label="policy term years" value={draft.policy_term_years ?? ''} onChange={(v) => setDraft((d) => ({ ...d, policy_term_years: v === '' ? null : Number(v) }))} type="number" />
-                <Input label="policy term months" value={draft.policy_term_months ?? ''} onChange={(v) => setDraft((d) => ({ ...d, policy_term_months: v === '' ? null : Number(v) }))} type="number" />
-              </div>
-              <div className="row cols-2">
-                <label className="stack" style={{ gap: 6 }}>
-                  <span className="muted tiny">price phases JSON</span>
-                  <textarea value={JSON.stringify(draft.price_phases || [], null, 2)} onChange={(e) => { try { setDraft((d) => ({ ...d, price_phases: JSON.parse(e.target.value) })); } catch {} }} />
-                </label>
-                <label className="stack" style={{ gap: 6 }}>
-                  <span className="muted tiny">cancel windows JSON</span>
-                  <textarea value={JSON.stringify(draft.cancel_windows || [], null, 2)} onChange={(e) => { try { setDraft((d) => ({ ...d, cancel_windows: JSON.parse(e.target.value) })); } catch {} }} />
-                </label>
-              </div>
+                    if (monthIdx >= 1) {
+                      if (item.type === 'warranty') {
+                        if (monthIdx <= (item.warrantyMonths || 0)) {
+                          content = '保修中';
+                          bgColor = '#eef5ff';
+                          borderColor = '#dbe8ff';
+                        }
+                      } else {
+                        const price = resolvePlanPrice(item.pricePhases, monthIdx);
+                        if (price !== null) {
+                          const inCancel = isInCancel(item.cancelWindows, monthIdx);
+                          content = inCancel ? '退会期' : fmtMoney(price, item.currency);
+                          bgColor = inCancel ? '#fff6f1' : '#eef5ff';
+                          borderColor = inCancel ? '#ffd8bf' : '#dbe8ff';
+                        }
+                      }
+                    }
 
-              <div className="card">
-                <div className="card-head">
-                  <div>
-                    <div style={{ fontWeight: 700 }}>月度预览</div>
-                    <div className="muted tiny">从开始日期开始的 12 个月</div>
-                  </div>
-                  <span className="badge">{fmtMoney(draft.balance ?? 0, draft.currency || 'CNY')}</span>
-                </div>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(12, minmax(84px, 1fr))', gap: 8, overflowX: 'auto' }}>
-                  {previewMonths.map((m) => {
-                    const amt = activePhase((draft.price_phases || []) as any, m.idx);
                     return (
-                      <div key={m.label} className="card" style={{ minWidth: 84, padding: '0.65rem', gap: 4 }}>
-                        <div className="tiny muted">{m.label}</div>
-                        <div style={{ fontWeight: 700 }}>{amt == null ? '—' : fmtMoney(amt, draft.currency || 'CNY')}</div>
+                      <div key={m.ym} style={{ background: bgColor, border: `1px solid ${borderColor}`, borderRadius: 10, padding: 8, fontSize: 12, minHeight: 40 }}>
+                        {content}
                       </div>
                     );
                   })}
                 </div>
-              </div>
+              );
+            })}
+          </div>
+        </div>
+      </div>
 
-              {msg && <div className="card"><div className="badge red">提示</div><div>{msg}</div></div>}
+      {showDialog && editingItem && (
+        <div style={{ position: 'fixed', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,.35)', zIndex: 9999 }} onClick={(e) => e.target === e.currentTarget && closeDialog()}>
+          <div style={{ width: 'min(680px,92vw)', maxHeight: '92vh', overflow: 'auto', background: '#fff', borderRadius: 14, padding: 14, boxShadow: '0 12px 32px rgba(0,0,0,.18)' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+              <h3>{editingItem.id ? '编辑项目' : '新建项目'}</h3>
+              <button style={{ background: '#eceff3', color: '#111827', border: 0, borderRadius: 10, padding: '8px 12px', cursor: 'pointer' }} onClick={closeDialog}>×</button>
+            </div>
+
+            <div style={{ display: 'flex', gap: 10, marginTop: 8 }}>
+              <select style={{ width: 120, border: '1px solid #eef0f3', borderRadius: 10, padding: '8px 10px' }} value={editingItem.type} onChange={(e) => setEditingItem({ ...editingItem, type: e.target.value as ItemType })}>
+                <option value="plan">套餐</option>
+                <option value="warranty">保修</option>
+                <option value="insurance">保险</option>
+              </select>
+              <input style={{ flex: 1, minWidth: 0, border: '1px solid #eef0f3', borderRadius: 10, padding: '8px 10px' }} placeholder="项目名称" value={editingItem.name} onChange={(e) => setEditingItem({ ...editingItem, name: e.target.value })} />
+            </div>
+
+            <div style={{ display: 'flex', gap: 10, marginTop: 8 }}>
+              <input style={{ width: '100%', border: '1px solid #eef0f3', borderRadius: 10, padding: '8px 10px' }} placeholder="编号/卡号(可选)" value={editingItem.number || ''} onChange={(e) => setEditingItem({ ...editingItem, number: e.target.value })} />
+            </div>
+
+            <div style={{ display: 'flex', gap: 10, marginTop: 8, alignItems: 'center' }}>
+              <label style={{ fontSize: 12, color: '#667085' }}>开始日</label>
+              <input type="date" style={{ width: 140, border: '1px solid #eef0f3', borderRadius: 10, padding: '8px 10px' }} value={editingItem.startDate} onChange={(e) => setEditingItem({ ...editingItem, startDate: e.target.value })} />
+              <label style={{ fontSize: 12, color: '#667085' }}>货币</label>
+              <select style={{ width: 120, border: '1px solid #eef0f3', borderRadius: 10, padding: '8px 10px' }} value={editingItem.currency} onChange={(e) => setEditingItem({ ...editingItem, currency: e.target.value })}>
+                <option value="CNY">CNY ￥</option>
+                <option value="JPY">JPY ¥</option>
+                <option value="USD">USD $</option>
+                <option value="EUR">EUR €</option>
+              </select>
+            </div>
+
+            {msg && <div style={{ fontSize: 12, color: '#ef4444', marginTop: 10, textAlign: 'right' }}>{msg}</div>}
+
+            <div style={{ display: 'flex', gap: 8, justifyContent: 'space-between', marginTop: 12 }}>
+              {editingItem.id && <button style={{ color: '#d93025', background: '#fff0f0', border: '1px solid #f5c6cb', borderRadius: 10, padding: '8px 12px', cursor: 'pointer' }} onClick={() => { deleteItem(editingItem.id); closeDialog(); }}>删除</button>}
+              <div style={{ display: 'flex', gap: 8, marginLeft: 'auto' }}>
+                <button style={{ background: '#eceff3', color: '#111827', border: 0, borderRadius: 10, padding: '8px 12px', cursor: 'pointer' }} onClick={closeDialog}>取消</button>
+                <button style={{ background: '#3b82f6', color: '#fff', border: 0, borderRadius: 10, padding: '8px 12px', cursor: 'pointer' }} onClick={saveItem}>保存</button>
+              </div>
             </div>
           </div>
         </div>
-      </section>
+      )}
+
+      {showStats && (
+        <div style={{ position: 'fixed', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,.35)', zIndex: 9999 }} onClick={(e) => e.target === e.currentTarget && setShowStats(false)}>
+          <div style={{ width: 'min(820px,92vw)', maxHeight: '92vh', overflow: 'auto', background: '#fff', borderRadius: 14, padding: 14 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+              <h3>统计与汇总</h3>
+              <button style={{ background: '#eceff3', color: '#111827', border: 0, borderRadius: 10, padding: '8px 12px', cursor: 'pointer' }} onClick={() => setShowStats(false)}>×</button>
+            </div>
+            <div style={{ fontSize: 14, color: '#667085' }}>
+              共 {items.length} 个项目
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

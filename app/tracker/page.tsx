@@ -131,15 +131,14 @@ function EditModal({
     color: '#e6edf3',
     borderRadius: 9,
     padding: '12px 15px',
-    fontSize: '1.3125rem',
+    fontSize: '1.96875rem',
     width: '100%',
   };
   const labelStyle: React.CSSProperties = {
-    fontSize: '1.125rem',
     color: '#8b949e',
-    textTransform: 'uppercase',
-    letterSpacing: '0.05em',
-    marginBottom: 6,
+    fontSize: '1.6875rem',
+    fontWeight: 600,
+    marginBottom: 8,
   };
   const groupStyle: React.CSSProperties = {
     display: 'flex',
@@ -159,7 +158,7 @@ function EditModal({
         background: '#161b22', border: '1px solid #30363d', borderRadius: 18,
         padding: 42, width: '100%', maxWidth: 960, maxHeight: '90vh', overflowY: 'auto',
       }}>
-        <h2 style={{ marginBottom: 30, fontSize: '1.65rem', color: '#58a6ff' }}>
+        <h2 style={{ marginBottom: 30, fontSize: '2.4825rem', color: '#58a6ff' }}>
           {task ? '编辑记录' : '新建记录'}
         </h2>
 
@@ -241,16 +240,16 @@ function EditModal({
           </div>
 
           {status && (
-            <p style={{ fontSize: '1.2rem', color: '#dc3545', marginBottom: 12 }}>{status}</p>
+            <p style={{ fontSize: '1.8rem', color: '#dc3545', marginBottom: 12 }}>{status}</p>
           )}
 
           <div style={{ display: 'flex', gap: 15, marginTop: 30, justifyContent: 'flex-end' }}>
             <button type="button" onClick={onClose}
-              style={{ padding: '12px 24px', border: '1px solid #30363d', background: '#21262d', color: '#e6edf3', borderRadius: 9, cursor: 'pointer', fontSize: '1.3125rem' }}>
+              style={{ padding: '18px 36px', border: '1px solid #30363d', background: '#21262d', color: '#e6edf3', borderRadius: 9, cursor: 'pointer', fontSize: '1.96875rem' }}>
               取消
             </button>
             <button type="submit"
-              style={{ padding: '12px 24px', border: '1px solid #238636', background: '#238636', color: '#e6edf3', borderRadius: 9, cursor: 'pointer', fontSize: '1.3125rem' }}>
+              style={{ padding: '18px 36px', border: '1px solid #238636', background: '#238636', color: '#e6edf3', borderRadius: 9, cursor: 'pointer', fontSize: '1.96875rem' }}>
               保存
             </button>
           </div>
