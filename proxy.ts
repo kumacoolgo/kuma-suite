@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { timingSafeEqual } from 'crypto';
 
 function isPublicPath(pathname: string) {
   return (
@@ -28,7 +29,21 @@ export function proxy(req: NextRequest) {
       const idx = decoded.indexOf(':');
       const u = idx >= 0 ? decoded.slice(0, idx) : decoded;
       const p = idx >= 0 ? decoded.slice(idx + 1) : '';
-      if (u === user && p === pass) return NextResponse.next();
+
+      // Use timing-safe comparison to prevent timing attacks
+      const userBuf = Buffer.from(u);
+      const passBuf = Buffer.from(p);
+      const expectedUserBuf = Buffer.from(user);
+      const expectedPassBuf = Buffer.from(pass);
+
+      const userMatch =
+        userBuf.length === expectedUserBuf.length &&
+        timingSafeEqual(userBuf, expectedUserBuf);
+      const passMatch =
+        passBuf.length === expectedPassBuf.length &&
+        timingSafeEqual(passBuf, expectedPassBuf);
+
+      if (userMatch && passMatch) return NextResponse.next();
     } catch {
       // fall through to challenge
     }

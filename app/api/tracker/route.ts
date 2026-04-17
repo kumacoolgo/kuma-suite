@@ -1,11 +1,11 @@
 import { NextResponse } from 'next/server';
-import { dbTransaction } from '@/lib/db';
+import { dbQuery, dbTransaction } from '@/lib/db';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
 export async function GET() {
-  const { rows } = await dbTransaction((client) => client.query('SELECT * FROM tracker_tasks ORDER BY sort_order ASC, created_at ASC'));
+  const { rows } = await dbQuery('SELECT * FROM tracker_tasks ORDER BY sort_order ASC, created_at ASC');
   return NextResponse.json({ items: rows });
 }
 

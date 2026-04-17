@@ -1,32 +1,10 @@
 import { NextResponse } from 'next/server';
 import { nanoid } from 'nanoid';
-import { dbQuery, dbTransaction } from '@/lib/db';
+import { dbTransaction } from '@/lib/db';
+import { normalizeTimelineItem } from '@/lib/timeline-normalize';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
-
-function normalizeItem(item: any) {
-  return {
-    id: String(item.id || nanoid()),
-    type: String(item.type || '').trim(),
-    name: String(item.name || '').trim(),
-    number: item.number ?? null,
-    start_date: String(item.start_date || '').slice(0, 10),
-    currency: String(item.currency || 'CNY').trim() || 'CNY',
-    category: item.category ?? null,
-    tags: Array.isArray(item.tags) ? item.tags.map(String) : [],
-    billing_day: item.billing_day ?? null,
-    cycle: item.cycle || 'monthly',
-    fiscal_month: item.fiscal_month ?? null,
-    price_phases: Array.isArray(item.price_phases) ? item.price_phases : [],
-    cancel_windows: Array.isArray(item.cancel_windows) ? item.cancel_windows : [],
-    warranty_months: item.warranty_months ?? null,
-    policy_term_years: item.policy_term_years ?? null,
-    policy_term_months: item.policy_term_months ?? null,
-    balance: item.balance ?? null,
-    balance_from: item.balance_from ?? null,
-  };
-}
 
 export async function POST(req: Request) {
   const form = await req.formData();
@@ -43,7 +21,10 @@ export async function POST(req: Request) {
   }
   if (!Array.isArray(items)) return NextResponse.json({ error: 'invalid file' }, { status: 400 });
 
-  const normalized = items.map(normalizeItem);
+  const normalized = items.map((item: any) => ({
+    ...normalizeTimelineItem(item, true),
+    id: String(item.id || nanoid()),
+  }));
   if (normalized.some((item) => !item.type || !item.name || !item.start_date)) {
     return NextResponse.json({ error: 'missing required fields' }, { status: 400 });
   }

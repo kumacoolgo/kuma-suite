@@ -4,8 +4,16 @@ function keyMaterial() {
   return process.env.VAULT_SECRET || process.env.ADMIN_PASSWORD || 'kuma-suite-vault';
 }
 
+// Cache the derived key so scryptSync runs only once per process startup
+let _cachedKey: Buffer | null = null;
+let _cachedMaterial: string | null = null;
+
 function deriveKey() {
-  return crypto.scryptSync(keyMaterial(), 'kuma-suite-salt', 32);
+  const material = keyMaterial();
+  if (_cachedKey && _cachedMaterial === material) return _cachedKey;
+  _cachedKey = crypto.scryptSync(material, 'kuma-suite-salt', 32);
+  _cachedMaterial = material;
+  return _cachedKey;
 }
 
 export function encryptSecret(plaintext: string) {
