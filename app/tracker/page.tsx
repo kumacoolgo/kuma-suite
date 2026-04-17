@@ -55,17 +55,17 @@ function DetailPanel({ task }: { task: GameTask }) {
   return (
     <div style={{
       background: '#111',
-      padding: '10px 20px',
+      padding: '15px 30px',
       borderTop: '1px solid #21262d',
     }}>
       {items.map(([label, value]) => (
-        <div key={label} style={{ display: 'flex', gap: 20, padding: '4px 0' }}>
-          <div style={{ width: 120, color: '#9adcfe', flexShrink: 0, fontSize: '0.875rem' }}>{label}</div>
+        <div key={label} style={{ display: 'flex', gap: 30, padding: '6px 0' }}>
+          <div style={{ width: 180, color: '#9adcfe', flexShrink: 0, fontSize: '1.3125rem' }}>{label}</div>
           <div style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
             {isUrl(value)
               ? <a href={value!} target="_blank" rel="noopener noreferrer"
-                  style={{ color: '#58a6ff', textDecoration: 'none' }}>{value}</a>
-              : <span style={{ color: '#4ec9b0' }}>{value || ''}</span>
+                  style={{ color: '#58a6ff', textDecoration: 'none', fontSize: '1.3125rem' }}>{value}</a>
+              : <span style={{ color: '#4ec9b0', fontSize: '1.3125rem' }}>{value || ''}</span>
             }
           </div>
         </div>
@@ -129,17 +129,17 @@ function EditModal({
     background: '#0d1117',
     border: '1px solid #30363d',
     color: '#e6edf3',
-    borderRadius: 6,
-    padding: '8px 10px',
-    fontSize: '0.875rem',
+    borderRadius: 9,
+    padding: '12px 15px',
+    fontSize: '1.3125rem',
     width: '100%',
   };
   const labelStyle: React.CSSProperties = {
-    fontSize: '0.75rem',
+    fontSize: '1.125rem',
     color: '#8b949e',
     textTransform: 'uppercase',
     letterSpacing: '0.05em',
-    marginBottom: 4,
+    marginBottom: 6,
   };
   const groupStyle: React.CSSProperties = {
     display: 'flex',
@@ -156,16 +156,16 @@ function EditModal({
       }}
     >
       <div style={{
-        background: '#161b22', border: '1px solid #30363d', borderRadius: 12,
-        padding: 28, width: '100%', maxWidth: 640, maxHeight: '90vh', overflowY: 'auto',
+        background: '#161b22', border: '1px solid #30363d', borderRadius: 18,
+        padding: 42, width: '100%', maxWidth: 960, maxHeight: '90vh', overflowY: 'auto',
       }}>
-        <h2 style={{ marginBottom: 20, fontSize: '1.1rem', color: '#58a6ff' }}>
+        <h2 style={{ marginBottom: 30, fontSize: '1.65rem', color: '#58a6ff' }}>
           {task ? '编辑记录' : '新建记录'}
         </h2>
 
         <form onSubmit={handleSubmit}>
           {/* Row 1: test_name + publisher */}
-          <div style={{ display: 'flex', gap: 12, marginBottom: 12 }}>
+          <div style={{ display: 'flex', gap: 18, marginBottom: 18 }}>
             <div style={{ ...groupStyle, flex: 2 }}>
               <label style={labelStyle}>测试名称 *</label>
               <input ref={firstRef} style={inputStyle} value={form.test_name} onChange={set('test_name')} required />
@@ -177,7 +177,7 @@ function EditModal({
           </div>
 
           {/* Row 2: start_date + end_date */}
-          <div style={{ display: 'flex', gap: 12, marginBottom: 12 }}>
+          <div style={{ display: 'flex', gap: 18, marginBottom: 18 }}>
             <div style={groupStyle}>
               <label style={labelStyle}>开始日期</label>
               <input type="date" style={inputStyle} value={form.start_date} onChange={set('start_date')} />
@@ -189,27 +189,27 @@ function EditModal({
           </div>
 
           {/* Row 3: test_case */}
-          <div style={{ marginBottom: 12 }}>
+          <div style={{ marginBottom: 18 }}>
             <label style={labelStyle}>Test Case</label>
-            <textarea style={{ ...inputStyle, resize: 'vertical', minHeight: 50 }}
+            <textarea style={{ ...inputStyle, resize: 'vertical', minHeight: 75 }}
               value={form.test_case} onChange={set('test_case')} />
           </div>
 
           {/* Row 4: test_result */}
-          <div style={{ marginBottom: 12 }}>
+          <div style={{ marginBottom: 18 }}>
             <label style={labelStyle}>Test Result</label>
-            <textarea style={{ ...inputStyle, resize: 'vertical', minHeight: 50 }}
+            <textarea style={{ ...inputStyle, resize: 'vertical', minHeight: 75 }}
               value={form.test_result} onChange={set('test_result')} />
           </div>
 
           {/* Row 5: gamepack */}
-          <div style={{ marginBottom: 12 }}>
+          <div style={{ marginBottom: 18 }}>
             <label style={labelStyle}>Gamepack</label>
             <input style={inputStyle} value={form.gamepack} onChange={set('gamepack')} />
           </div>
 
           {/* Row 6: work_time + income1 + received_date1 */}
-          <div style={{ display: 'flex', gap: 12, marginBottom: 12 }}>
+          <div style={{ display: 'flex', gap: 18, marginBottom: 18 }}>
             <div style={groupStyle}>
               <label style={labelStyle}>工时</label>
               <input style={inputStyle} value={form.work_time} onChange={set('work_time')} />
@@ -225,7 +225,7 @@ function EditModal({
           </div>
 
           {/* Row 7: payment + income2 + received_date2 */}
-          <div style={{ display: 'flex', gap: 12, marginBottom: 12 }}>
+          <div style={{ display: 'flex', gap: 18, marginBottom: 18 }}>
             <div style={groupStyle}>
               <label style={labelStyle}>支付方式</label>
               <input style={inputStyle} value={form.payment} onChange={set('payment')} />
@@ -241,16 +241,16 @@ function EditModal({
           </div>
 
           {status && (
-            <p style={{ fontSize: '0.8rem', color: '#dc3545', marginBottom: 8 }}>{status}</p>
+            <p style={{ fontSize: '1.2rem', color: '#dc3545', marginBottom: 12 }}>{status}</p>
           )}
 
-          <div style={{ display: 'flex', gap: 10, marginTop: 20, justifyContent: 'flex-end' }}>
+          <div style={{ display: 'flex', gap: 15, marginTop: 30, justifyContent: 'flex-end' }}>
             <button type="button" onClick={onClose}
-              style={{ padding: '8px 16px', border: '1px solid #30363d', background: '#21262d', color: '#e6edf3', borderRadius: 6, cursor: 'pointer' }}>
+              style={{ padding: '12px 24px', border: '1px solid #30363d', background: '#21262d', color: '#e6edf3', borderRadius: 9, cursor: 'pointer', fontSize: '1.3125rem' }}>
               取消
             </button>
             <button type="submit"
-              style={{ padding: '8px 16px', border: '1px solid #238636', background: '#238636', color: '#e6edf3', borderRadius: 6, cursor: 'pointer' }}>
+              style={{ padding: '12px 24px', border: '1px solid #238636', background: '#238636', color: '#e6edf3', borderRadius: 9, cursor: 'pointer', fontSize: '1.3125rem' }}>
               保存
             </button>
           </div>
@@ -262,7 +262,7 @@ function EditModal({
 
 // ─── Main Page ───────────────────────────────────────────────────────────────
 
-const COLS = '40px 2fr 1fr 90px 90px 80px 60px 70px 90px 70px 70px 90px';
+const COLS = '60px 2fr 1fr 135px 135px 120px 90px 105px 135px 105px 105px 135px';
 
 export default function TrackerPage() {
   const [tasks, setTasks] = useState<GameTask[]>([]);
@@ -379,20 +379,20 @@ export default function TrackerPage() {
   }
 
   const btnBase: React.CSSProperties = {
-    padding: '8px 16px', border: '1px solid #30363d', background: '#21262d',
-    color: '#e6edf3', borderRadius: 6, cursor: 'pointer', fontSize: '0.875rem',
+    padding: '12px 24px', border: '1px solid #30363d', background: '#21262d',
+    color: '#e6edf3', borderRadius: 9, cursor: 'pointer', fontSize: '1.3125rem',
   };
 
   const headerCellStyle: React.CSSProperties = {
-    padding: '10px 12px', fontSize: '0.8rem', color: '#8b949e',
+    padding: '15px 18px', fontSize: '1.2rem', color: '#8b949e',
     fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em',
     overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis',
   };
 
   return (
-    <div style={{ padding: 20, maxWidth: 1200, margin: '0 auto' }}>
+    <div style={{ padding: 30, maxWidth: 1800, margin: '0 auto' }}>
       {/* Toolbar */}
-      <div style={{ display: 'flex', gap: 8, marginBottom: 16, flexWrap: 'wrap' }}>
+      <div style={{ display: 'flex', gap: 12, marginBottom: 24, flexWrap: 'wrap' }}>
         <button style={btnBase} onClick={() => { setModalTask(null); setModalStatus(''); }}>+ 新建</button>
         <button style={{ ...btnBase, opacity: selectedId === null ? 0.4 : 1, cursor: selectedId === null ? 'not-allowed' : 'pointer' }}
           disabled={selectedId === null}
@@ -418,13 +418,13 @@ export default function TrackerPage() {
 
       {/* Status */}
       {status && (
-        <p style={{ fontSize: '0.8rem', color: statusErr ? '#dc3545' : '#8b949e', marginBottom: 12 }}>{status}</p>
+        <p style={{ fontSize: '1.2rem', color: statusErr ? '#dc3545' : '#8b949e', marginBottom: 18 }}>{status}</p>
       )}
 
       {/* Grid */}
-      <div style={{ border: '1px solid #30363d', borderRadius: 8, overflowX: 'auto' }}>
+      <div style={{ border: '1px solid #30363d', borderRadius: 12, overflowX: 'auto' }}>
         {/* Header */}
-        <div style={{ display: 'grid', gridTemplateColumns: COLS, minWidth: 900, background: '#161b22' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: COLS, minWidth: 1350, background: '#161b22' }}>
           {['#', '测试名称', '发行商', '开始', '结束', 'Test Case', '工时', '收入1', '收款日1', '支付', '收入2', '收款日2'].map(h => (
             <div key={h} style={headerCellStyle}>{h}</div>
           ))}
@@ -432,7 +432,7 @@ export default function TrackerPage() {
 
         {/* Rows */}
         {tasks.length === 0 ? (
-          <div style={{ padding: 24, textAlign: 'center', color: '#484f58', fontSize: '0.875rem' }}>
+          <div style={{ padding: 36, textAlign: 'center', color: '#484f58', fontSize: '1.3125rem' }}>
             暂无记录 — 点击「新建」添加
           </div>
         ) : tasks.map((task, idx) => (
@@ -443,7 +443,7 @@ export default function TrackerPage() {
                 setExpandedId(null);
               }}
               style={{
-                display: 'grid', gridTemplateColumns: COLS, minWidth: 900,
+                display: 'grid', gridTemplateColumns: COLS, minWidth: 1350,
                 borderTop: '1px solid #21262d', cursor: 'pointer',
                 background: selectedId === task.id ? '#1f6feb22' : 'transparent',
                 borderLeft: selectedId === task.id ? '3px solid #58a6ff' : '3px solid transparent',
@@ -457,7 +457,7 @@ export default function TrackerPage() {
                 task.start_date ?? '',
                 task.end_date ?? '',
               ].map((val, ci) => (
-                <div key={ci} style={{ padding: '10px 12px', display: 'flex', alignItems: 'center', overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis', fontSize: '0.875rem' }}>
+                <div key={ci} style={{ padding: '15px 18px', display: 'flex', alignItems: 'center', overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis', fontSize: '1.3125rem' }}>
                   {val}
                 </div>
               ))}
@@ -465,7 +465,7 @@ export default function TrackerPage() {
               {/* Test Case toggle */}
               <div
                 onClick={(e) => { e.stopPropagation(); setExpandedId(expandedId === task.id ? null : task.id); }}
-                style={{ padding: '10px 12px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#58a6ff', cursor: 'pointer', fontSize: '0.875rem' }}
+                style={{ padding: '15px 18px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#58a6ff', cursor: 'pointer', fontSize: '1.3125rem' }}
               >
                 Detail
               </div>
@@ -478,7 +478,7 @@ export default function TrackerPage() {
                 task.income2 ?? '',
                 task.received_date2 ?? '',
               ].map((val, ci) => (
-                <div key={ci} style={{ padding: '10px 12px', display: 'flex', alignItems: 'center', overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis', fontSize: '0.875rem' }}>
+                <div key={ci} style={{ padding: '15px 18px', display: 'flex', alignItems: 'center', overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis', fontSize: '1.3125rem' }}>
                   {val}
                 </div>
               ))}
