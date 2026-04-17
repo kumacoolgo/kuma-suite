@@ -46,7 +46,8 @@ async function api(method, path, body) {
 
 async function loadTasks() {
     try {
-        tasks = await api("GET", "");
+        const data = await api("GET", "");
+        tasks = Array.isArray(data) ? data : (data.items ?? []);
         selectedId = null;
         updateReorderButtons();
         renderGrid();
