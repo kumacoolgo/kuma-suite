@@ -130,15 +130,15 @@ function EditModal({
     border: '1px solid var(--tracker-line)',
     color: 'var(--tracker-text)',
     borderRadius: 9,
-    padding: '12px 15px',
-    fontSize: '1.96875rem',
+    padding: '10px 12px',
+    fontSize: '1rem',
     width: '100%',
   };
   const labelStyle: React.CSSProperties = {
     color: 'var(--tracker-muted)',
-    fontSize: '1.6875rem',
+    fontSize: '0.95rem',
     fontWeight: 600,
-    marginBottom: 8,
+    marginBottom: 6,
   };
   const groupStyle: React.CSSProperties = {
     display: 'flex',
@@ -151,20 +151,20 @@ function EditModal({
       onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
       style={{
         position: 'fixed', inset: 0, background: 'rgba(2, 8, 23, 0.62)',
-        zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20,
+        zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16,
       }}
     >
       <div style={{
         background: 'var(--tracker-surface)', border: '1px solid var(--tracker-line)', borderRadius: 18,
-        padding: 42, width: '100%', maxWidth: 960, maxHeight: '90vh', overflowY: 'auto',
+        padding: 22, width: 'min(1180px, calc(100vw - 32px))', maxHeight: 'calc(100vh - 32px)', overflow: 'hidden',
       }}>
-        <h2 style={{ marginBottom: 30, fontSize: '2.4825rem', color: 'var(--tracker-accent)' }}>
+        <h2 style={{ marginBottom: 16, fontSize: '1.35rem', color: 'var(--tracker-accent)' }}>
           {task ? '编辑记录' : '新建记录'}
         </h2>
 
         <form onSubmit={handleSubmit}>
           {/* Row 1: test_name + publisher */}
-          <div style={{ display: 'flex', gap: 18, marginBottom: 18 }}>
+          <div style={{ display: 'flex', gap: 14, marginBottom: 12 }}>
             <div style={{ ...groupStyle, flex: 2 }}>
               <label style={labelStyle}>测试名称 *</label>
               <input ref={firstRef} style={inputStyle} value={form.test_name} onChange={set('test_name')} required />
@@ -176,7 +176,7 @@ function EditModal({
           </div>
 
           {/* Row 2: start_date + end_date */}
-          <div style={{ display: 'flex', gap: 18, marginBottom: 18 }}>
+          <div style={{ display: 'flex', gap: 14, marginBottom: 12 }}>
             <div style={groupStyle}>
               <label style={labelStyle}>开始日期</label>
               <input type="date" style={inputStyle} value={form.start_date} onChange={set('start_date')} />
@@ -187,32 +187,40 @@ function EditModal({
             </div>
           </div>
 
-          {/* Row 3: test_case */}
-          <div style={{ marginBottom: 18 }}>
-            <label style={labelStyle}>Test Case</label>
-            <textarea style={{ ...inputStyle, resize: 'vertical', minHeight: 75 }}
-              value={form.test_case} onChange={set('test_case')} />
-          </div>
-
-          {/* Row 4: test_result */}
-          <div style={{ marginBottom: 18 }}>
-            <label style={labelStyle}>Test Result</label>
-            <textarea style={{ ...inputStyle, resize: 'vertical', minHeight: 75 }}
-              value={form.test_result} onChange={set('test_result')} />
-          </div>
-
-          {/* Row 5: gamepack */}
-          <div style={{ marginBottom: 18 }}>
-            <label style={labelStyle}>Gamepack</label>
-            <input style={inputStyle} value={form.gamepack} onChange={set('gamepack')} />
-          </div>
-
-          {/* Row 6: work_time + income1 + received_date1 */}
-          <div style={{ display: 'flex', gap: 18, marginBottom: 18 }}>
+          {/* Row 3: work_time + payment */}
+          <div style={{ display: 'flex', gap: 14, marginBottom: 12 }}>
             <div style={groupStyle}>
               <label style={labelStyle}>工时</label>
               <input style={inputStyle} value={form.work_time} onChange={set('work_time')} />
             </div>
+            <div style={groupStyle}>
+              <label style={labelStyle}>支付方式</label>
+              <input style={inputStyle} value={form.payment} onChange={set('payment')} />
+            </div>
+          </div>
+
+          {/* Row 4: test_case + test_result */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: 14, marginBottom: 12 }}>
+            <div style={groupStyle}>
+              <label style={labelStyle}>Test Case</label>
+              <textarea style={{ ...inputStyle, resize: 'none', minHeight: 92 }}
+                value={form.test_case} onChange={set('test_case')} />
+            </div>
+            <div style={groupStyle}>
+              <label style={labelStyle}>Test Result</label>
+              <textarea style={{ ...inputStyle, resize: 'none', minHeight: 92 }}
+                value={form.test_result} onChange={set('test_result')} />
+            </div>
+          </div>
+
+          {/* Row 5: gamepack */}
+          <div style={{ marginBottom: 12 }}>
+            <label style={labelStyle}>Gamepack</label>
+            <input style={inputStyle} value={form.gamepack} onChange={set('gamepack')} />
+          </div>
+
+          {/* Row 6: income fields */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', gap: 14, marginBottom: 12 }}>
             <div style={groupStyle}>
               <label style={labelStyle}>收入1</label>
               <input style={inputStyle} value={form.income1} onChange={set('income1')} />
@@ -220,14 +228,6 @@ function EditModal({
             <div style={groupStyle}>
               <label style={labelStyle}>收款日1</label>
               <input type="date" style={inputStyle} value={form.received_date1} onChange={set('received_date1')} />
-            </div>
-          </div>
-
-          {/* Row 7: payment + income2 + received_date2 */}
-          <div style={{ display: 'flex', gap: 18, marginBottom: 18 }}>
-            <div style={groupStyle}>
-              <label style={labelStyle}>支付方式</label>
-              <input style={inputStyle} value={form.payment} onChange={set('payment')} />
             </div>
             <div style={groupStyle}>
               <label style={labelStyle}>收入2</label>
@@ -240,16 +240,16 @@ function EditModal({
           </div>
 
           {status && (
-            <p style={{ fontSize: '1.8rem', color: '#dc3545', marginBottom: 12 }}>{status}</p>
+            <p style={{ fontSize: '0.95rem', color: '#dc3545', marginBottom: 10 }}>{status}</p>
           )}
 
-          <div style={{ display: 'flex', gap: 15, marginTop: 30, justifyContent: 'flex-end' }}>
+          <div style={{ display: 'flex', gap: 12, marginTop: 14, justifyContent: 'flex-end' }}>
             <button type="button" onClick={onClose}
-              style={{ padding: '18px 36px', border: '1px solid var(--tracker-line)', background: 'var(--button-bg)', color: 'var(--tracker-text)', borderRadius: 9, cursor: 'pointer', fontSize: '1.96875rem' }}>
+              style={{ padding: '10px 22px', border: '1px solid var(--tracker-line)', background: 'var(--button-bg)', color: 'var(--tracker-text)', borderRadius: 9, cursor: 'pointer', fontSize: '1rem' }}>
               取消
             </button>
             <button type="submit"
-              style={{ padding: '18px 36px', border: '1px solid var(--primary-border)', background: 'var(--primary-bg)', color: 'var(--primary-text)', borderRadius: 9, cursor: 'pointer', fontSize: '1.96875rem' }}>
+              style={{ padding: '10px 22px', border: '1px solid var(--primary-border)', background: 'var(--primary-bg)', color: 'var(--primary-text)', borderRadius: 9, cursor: 'pointer', fontSize: '1rem' }}>
               保存
             </button>
           </div>
