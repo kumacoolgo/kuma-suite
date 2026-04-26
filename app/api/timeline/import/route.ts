@@ -3,6 +3,7 @@ import { nanoid } from 'nanoid';
 import { dbTransaction } from '@/lib/db';
 import { normalizeTimelineItem } from '@/lib/timeline-normalize';
 import { withErrorHandler } from '@/lib/api-handler';
+import { parseCsv, parseJsonCell } from '@/lib/csv';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -12,20 +13,17 @@ const MAX_IMPORT_SIZE = 5 * 1024 * 1024; // 5 MB
 export const POST = withErrorHandler(async (req: Request) => {
   const form = await req.formData();
   const file = form.get('file');
+  const confirm = form.get('confirm');
   if (!(file instanceof File)) return NextResponse.json({ error: 'file required' }, { status: 400 });
+  if (confirm !== 'REPLACE_TIMELINE_ITEMS') return NextResponse.json({ error: 'confirmation required' }, { status: 400 });
   if (file.size > MAX_IMPORT_SIZE) return NextResponse.json({ error: 'file too large (max 5 MB)' }, { status: 413 });
-  let items: any[];
-  try {
-    const raw = await file.text();
-    const data = JSON.parse(raw);
-    items = Array.isArray(data) ? data : data.items;
-  } catch {
-    return NextResponse.json({ error: 'invalid file' }, { status: 400 });
-  }
-  if (!Array.isArray(items)) return NextResponse.json({ error: 'invalid file' }, { status: 400 });
-  const normalized = items.map((item: any) => ({
+  const items = parseCsv(await file.text());
+  const normalized = items.map((item) => ({
     ...normalizeTimelineItem(item, true),
     id: String(item.id || nanoid()),
+    tags: parseJsonCell(item.tags, []),
+    price_phases: parseJsonCell(item.pricePhases || item.price_phases, []),
+    cancel_windows: parseJsonCell(item.cancelWindows || item.cancel_windows, []),
   }));
   if (normalized.some((item) => !item.type || !item.name || !item.start_date)) {
     return NextResponse.json({ error: 'missing required fields' }, { status: 400 });

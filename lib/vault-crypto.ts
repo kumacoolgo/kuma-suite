@@ -1,7 +1,9 @@
 import crypto from 'crypto';
 
 function keyMaterial() {
-  return process.env.VAULT_SECRET || process.env.ADMIN_PASSWORD || 'kuma-suite-vault';
+  const secret = process.env.VAULT_SECRET;
+  if (!secret) throw new Error('VAULT_SECRET is required for password vault encryption');
+  return secret;
 }
 
 // Cache the derived key so scryptSync runs only once per process startup

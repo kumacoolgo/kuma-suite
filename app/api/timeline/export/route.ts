@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { dbQuery } from '@/lib/db';
 import { sanitizeTimelineRow } from '@/lib/timeline-normalize';
 import { withErrorHandler } from '@/lib/api-handler';
+import { toCsv } from '@/lib/csv';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -33,12 +34,39 @@ function toTimeline2Item(row: any) {
 
 export const GET = withErrorHandler(async () => {
   const { rows } = await dbQuery('SELECT * FROM timeline_items ORDER BY sort_order ASC, created_at ASC');
-  const payload = JSON.stringify(rows.map(toTimeline2Item), null, 2);
-  return new NextResponse(Buffer.from(payload), {
+  const items = rows.map(toTimeline2Item).map((item) => ({
+    ...item,
+    tags: JSON.stringify(item.tags ?? []),
+    pricePhases: JSON.stringify(item.pricePhases ?? []),
+    cancelWindows: JSON.stringify(item.cancelWindows ?? []),
+  }));
+  const columns = [
+    'id',
+    'type',
+    'name',
+    'number',
+    'startDate',
+    'currency',
+    'category',
+    'tags',
+    'billingDay',
+    'cycle',
+    'fiscalMonth',
+    'pricePhases',
+    'cancelWindows',
+    'warrantyMonths',
+    'policyTermYears',
+    'policyTermMonths',
+    'balance',
+    'balanceFrom',
+    'order',
+  ].map((key) => ({ key, label: key }));
+  const payload = toCsv(items, columns);
+  return new NextResponse(payload, {
     status: 200,
     headers: {
-      'Content-Type': 'application/json; charset=utf-8',
-      'Content-Disposition': 'attachment; filename="timeline.json"',
+      'Content-Type': 'text/csv; charset=utf-8',
+      'Content-Disposition': 'attachment; filename="timeline.csv"',
     },
   });
 });

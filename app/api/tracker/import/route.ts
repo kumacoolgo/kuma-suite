@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
-import * as XLSX from 'xlsx';
 import { dbTransaction } from '@/lib/db';
 import { withErrorHandler } from '@/lib/api-handler';
+import { parseCsv } from '@/lib/csv';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -13,10 +13,7 @@ export const POST = withErrorHandler(async (req: Request) => {
   const file = form.get('file');
   if (!(file instanceof File)) return NextResponse.json({ error: 'file required' }, { status: 400 });
   if (file.size > MAX_IMPORT_SIZE) return NextResponse.json({ error: 'file too large (max 5 MB)' }, { status: 413 });
-  const buffer = Buffer.from(await file.arrayBuffer());
-  const wb = XLSX.read(buffer, { type: 'buffer' });
-  const sheet = wb.Sheets[wb.SheetNames[0]];
-  const rows = XLSX.utils.sheet_to_json<Record<string, any>>(sheet, { defval: null });
+  const rows = parseCsv(await file.text());
   if (!rows.length) return NextResponse.json({ imported: 0 });
   const normalized = rows
     .map((row) => ({

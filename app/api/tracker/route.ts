@@ -30,7 +30,11 @@ export const POST = withErrorHandler(async (req: Request) => {
   return NextResponse.json({ item });
 });
 
-export const DELETE = withErrorHandler(async () => {
+export const DELETE = withErrorHandler(async (req: Request) => {
+  const body = await req.json().catch(() => ({}));
+  if (body.confirm !== 'DELETE_ALL_TRACKER_TASKS') {
+    return NextResponse.json({ error: 'confirmation required' }, { status: 400 });
+  }
   await dbQuery('DELETE FROM tracker_tasks');
   return NextResponse.json({ ok: true });
 });

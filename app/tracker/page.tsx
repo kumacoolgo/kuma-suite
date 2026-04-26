@@ -156,7 +156,7 @@ function EditModal({
     >
       <div style={{
         background: 'var(--tracker-surface)', border: '1px solid var(--tracker-line)', borderRadius: 18,
-        padding: 22, width: 'min(1180px, calc(100vw - 32px))', maxHeight: 'calc(100vh - 32px)', overflow: 'hidden',
+        padding: 22, width: 'min(1180px, calc(100vw - 32px))', maxHeight: 'calc(100vh - 32px)', overflow: 'auto',
       }}>
         <h2 style={{ marginBottom: 16, fontSize: '1.35rem', color: 'var(--tracker-accent)' }}>
           {task ? '编辑记录' : '新建记录'}
@@ -348,7 +348,7 @@ export default function TrackerPage() {
     if (tasks.length === 0) return;
     if (!confirm(`确定删除全部 ${tasks.length} 条游戏测试记录？此操作不可恢复。`)) return;
     try {
-      await apiJson('/api/tracker', { method: 'DELETE' });
+      await apiJson('/api/tracker', { method: 'DELETE', body: JSON.stringify({ confirm: 'DELETE_ALL_TRACKER_TASKS' }) });
       setSelectedId(null);
       setExpandedId(null);
       await loadTasks();
@@ -430,7 +430,7 @@ export default function TrackerPage() {
         </button>
         <button style={btnBase} onClick={() => window.open('/api/tracker/export')}>导出</button>
         <button style={btnBase} onClick={() => fileRef.current?.click()}>导入</button>
-        <input ref={fileRef} type="file" accept=".json" style={{ display: 'none' }} onChange={handleImport} />
+        <input ref={fileRef} type="file" accept="text/csv,.csv" style={{ display: 'none' }} onChange={handleImport} />
       </div>
 
       {/* Status */}

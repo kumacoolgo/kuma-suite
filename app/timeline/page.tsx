@@ -316,7 +316,7 @@ export default function TimelinePage() {
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `expense-timeline-export-${Date.now()}.json`;
+      a.download = `expense-timeline-export-${Date.now()}.csv`;
       document.body.appendChild(a);
       a.click();
       a.remove();
@@ -335,6 +335,7 @@ export default function TimelinePage() {
     try {
       const form = new FormData();
       form.append('file', file);
+      form.append('confirm', 'REPLACE_TIMELINE_ITEMS');
       const res = await fetch('/api/timeline/import', { method: 'POST', credentials: 'include', body: form });
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
@@ -453,7 +454,7 @@ export default function TimelinePage() {
         <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
           <button style={{ ...primaryButton, flex: 1 }} onClick={openNewDialog}>添加项目</button>
           <button style={{ ...buttonBase, whiteSpace: 'nowrap', opacity: activeItem ? 1 : 0.5 }} disabled={!activeItem} onClick={openEditDialog}>编辑项目</button>
-          <input ref={importRef} type="file" accept="application/json,.json" style={{ display: 'none' }} onChange={importItems} />
+          <input ref={importRef} type="file" accept="text/csv,.csv" style={{ display: 'none' }} onChange={importItems} />
           <button style={buttonBase} onClick={() => importRef.current?.click()}>导入</button>
           <button style={buttonBase} onClick={exportItems}>导出</button>
         </div>
