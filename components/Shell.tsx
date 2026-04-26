@@ -47,15 +47,6 @@ export function Shell({ children }: { children: React.ReactNode }) {
   if (isTimeline) {
     return (
       <div style={{ minHeight: '100vh', background: 'var(--timeline-bg)' }}>
-        <button
-          type="button"
-          className="theme-toggle"
-          onClick={toggleTheme}
-          aria-label={`切换到${themeLabel}模式`}
-          style={{ position: 'fixed', top: 16, right: 16, zIndex: 40 }}
-        >
-          {themeLabel}
-        </button>
         <main>{children}</main>
       </div>
     );
