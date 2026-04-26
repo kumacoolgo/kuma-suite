@@ -11,9 +11,12 @@ const NAV = [
   { href: '/vault', label: 'password-vault2', hint: '密码库' },
 ];
 
+type Theme = 'dark' | 'light';
+
 export function Shell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
+  const [theme, setTheme] = useState<Theme>('dark');
   const isTimeline = pathname === '/timeline';
 
   const active = useMemo(() => {
@@ -24,9 +27,35 @@ export function Shell({ children }: { children: React.ReactNode }) {
     setOpen(false);
   }, [pathname]);
 
+  useEffect(() => {
+    const current = document.documentElement.dataset.theme;
+    const initial = current === 'light' || current === 'dark' ? current : 'dark';
+    setTheme(initial);
+  }, []);
+
+  function toggleTheme() {
+    setTheme((current) => {
+      const next = current === 'dark' ? 'light' : 'dark';
+      document.documentElement.dataset.theme = next;
+      localStorage.setItem('kuma-theme', next);
+      return next;
+    });
+  }
+
+  const themeLabel = theme === 'dark' ? '浅色' : '深色';
+
   if (isTimeline) {
     return (
-      <div style={{ minHeight: '100vh', background: '#f6f8fb' }}>
+      <div style={{ minHeight: '100vh', background: 'var(--timeline-bg)' }}>
+        <button
+          type="button"
+          className="theme-toggle"
+          onClick={toggleTheme}
+          aria-label={`切换到${themeLabel}模式`}
+          style={{ position: 'fixed', top: 16, right: 16, zIndex: 40 }}
+        >
+          {themeLabel}
+        </button>
         <main>{children}</main>
       </div>
     );
@@ -48,6 +77,9 @@ export function Shell({ children }: { children: React.ReactNode }) {
               </Link>
             ))}
           </nav>
+          <button type="button" className="theme-toggle" onClick={toggleTheme} aria-label={`切换到${themeLabel}模式`}>
+            {themeLabel}
+          </button>
           <button type="button" className="menu-button" onClick={() => setOpen((v) => !v)} aria-expanded={open} aria-label="切换功能菜单">
             ☰
           </button>
@@ -59,6 +91,9 @@ export function Shell({ children }: { children: React.ReactNode }) {
                 {item.label} <span className="muted tiny">· {item.hint}</span>
               </Link>
             ))}
+            <button type="button" onClick={toggleTheme}>
+              切换到{themeLabel}模式
+            </button>
           </div>
         </div>
       </header>

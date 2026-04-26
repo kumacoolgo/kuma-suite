@@ -136,8 +136,8 @@ function typeColor(type: ItemType) {
 const buttonBase: React.CSSProperties = {
   border: 0,
   borderRadius: 10,
-  background: '#eceff3',
-  color: '#111827',
+  background: 'var(--timeline-control)',
+  color: 'var(--timeline-text)',
   padding: '8px 12px',
   cursor: 'pointer',
 };
@@ -149,11 +149,11 @@ const primaryButton: React.CSSProperties = {
 };
 
 const inputStyle: React.CSSProperties = {
-  border: '1px solid #eef0f3',
+  border: '1px solid var(--timeline-line)',
   borderRadius: 10,
   padding: '8px 10px',
-  background: '#fff',
-  color: '#0f172a',
+  background: 'var(--timeline-card)',
+  color: 'var(--timeline-text)',
 };
 
 export default function TimelinePage() {
@@ -420,8 +420,8 @@ export default function TimelinePage() {
         }
       }
     }
-    const background = isToday ? '#eef5ff' : cancel ? '#fff6f1' : '#fff';
-    const borderColor = isToday ? '#dbe8ff' : cancel ? '#ffd8bf' : '#eef0f3';
+    const background = isToday ? 'var(--timeline-today)' : cancel ? 'var(--timeline-cancel)' : 'var(--timeline-card)';
+    const borderColor = isToday ? 'var(--timeline-today-line)' : cancel ? 'var(--timeline-cancel-line)' : 'var(--timeline-line)';
     return { idx, content, sub, background, borderColor };
   }
 
@@ -430,14 +430,14 @@ export default function TimelinePage() {
   const showFiscal = showPlanBlock && draft.cycle === 'yearly';
 
   return (
-    <div style={{ maxWidth: 1200, margin: '18px auto', padding: '0 12px', color: '#0f172a' }}>
+    <div style={{ maxWidth: 1200, margin: '18px auto', padding: '0 12px', color: 'var(--timeline-text)' }}>
       {loading && (
         <div style={{ position: 'fixed', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(255,255,255,.45)', zIndex: 10000 }}>
-          <div style={{ width: 40, height: 40, border: '4px solid #eef0f3', borderTopColor: '#3b82f6', borderRadius: '50%' }} />
+          <div style={{ width: 40, height: 40, border: '4px solid var(--timeline-line)', borderTopColor: '#3b82f6', borderRadius: '50%' }} />
         </div>
       )}
 
-      <div style={{ background: '#fff', border: '1px solid #eef0f3', borderRadius: 14, padding: 10, marginBottom: 14, display: 'flex', flexDirection: 'column', gap: 10 }}>
+      <div style={{ background: 'var(--timeline-card)', border: '1px solid var(--timeline-line)', borderRadius: 14, padding: 10, marginBottom: 14, display: 'flex', flexDirection: 'column', gap: 10 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between' }}>
           <b>费用时间轴</b>
         </div>
@@ -460,7 +460,7 @@ export default function TimelinePage() {
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: '340px 1fr', gap: 14, alignItems: 'start' }}>
-        <div style={{ background: '#fff', border: '1px solid #eef0f3', borderRadius: 14, padding: 10 }}>
+        <div style={{ background: 'var(--timeline-card)', border: '1px solid var(--timeline-line)', borderRadius: 14, padding: 10 }}>
           <div style={{ maxHeight: 'calc(72px * 4 + 24px)', overflowY: 'auto', paddingTop: 4, paddingLeft: 4, paddingRight: 6 }}>
             {items.map((item) => {
               let rightInfo = '';
@@ -483,8 +483,8 @@ export default function TimelinePage() {
                     justifyContent: 'space-between',
                     padding: '6px 10px',
                     borderRadius: 12,
-                    border: '1px solid #eef0f3',
-                    background: '#fff',
+                    border: '1px solid var(--timeline-line)',
+                    background: 'var(--timeline-card)',
                     height: 72,
                     gap: 8,
                     marginBottom: 8,
@@ -496,13 +496,13 @@ export default function TimelinePage() {
                     <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, fontWeight: 600 }}>
                       <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', minWidth: 0 }}>{item.name}</span>
                       <span style={{ fontSize: 12, color: typeColor(item.type), flexShrink: 0 }}>{typeLabel(item.type)}</span>
-                      <span style={{ marginLeft: 'auto', flexShrink: 1, fontSize: 12, color: '#667085', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: 140 }}>#{item.number || '-'}</span>
+                      <span style={{ marginLeft: 'auto', flexShrink: 1, fontSize: 12, color: 'var(--timeline-muted)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: 140 }}>#{item.number || '-'}</span>
                     </div>
-                    <div style={{ fontSize: 12, color: '#667085', marginTop: 2 }}>
+                    <div style={{ fontSize: 12, color: 'var(--timeline-muted)', marginTop: 2 }}>
                       <span>开始日: {item.start_date || '-'}</span>
                       {rightInfo && <span style={{ marginLeft: 8 }}>{rightInfo}</span>}
                     </div>
-                    <div style={{ fontSize: 12, marginTop: 2, color: '#667085', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                    <div style={{ fontSize: 12, marginTop: 2, color: 'var(--timeline-muted)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                       {item.category && <span>· {item.category}</span>}
                       {item.tags?.length ? <span style={{ marginLeft: 8 }}>· {item.tags.join('/')}</span> : null}
                     </div>
@@ -510,15 +510,15 @@ export default function TimelinePage() {
                 </div>
               );
             })}
-            {!items.length && <div style={{ fontSize: 12, color: '#667085', textAlign: 'center', padding: 20 }}>没有匹配的项目</div>}
+            {!items.length && <div style={{ fontSize: 12, color: 'var(--timeline-muted)', textAlign: 'center', padding: 20 }}>没有匹配的项目</div>}
           </div>
         </div>
 
-        <div ref={gridRef} style={{ background: '#fff', border: '1px solid #eef0f3', borderRadius: 14, padding: 10, overflowX: 'auto' }}>
+        <div ref={gridRef} style={{ background: 'var(--timeline-card)', border: '1px solid var(--timeline-line)', borderRadius: 14, padding: 10, overflowX: 'auto' }}>
           <div style={{ display: 'grid', gap: 8, marginBottom: 8 }}>
             <div style={{ display: 'grid', gridTemplateColumns: `repeat(${months.length}, 110px)`, gap: 8 }}>
               {months.map((month) => (
-                <div key={month.ym} data-ym={month.ym} style={{ background: month.isToday ? '#eef5ff' : '#fff', border: `1px solid ${month.isToday ? '#dbe8ff' : '#eef0f3'}`, borderRadius: 10, padding: 8, whiteSpace: 'nowrap', fontSize: 12 }}>
+                <div key={month.ym} data-ym={month.ym} style={{ background: month.isToday ? 'var(--timeline-today)' : 'var(--timeline-card)', border: `1px solid ${month.isToday ? 'var(--timeline-today-line)' : 'var(--timeline-line)'}`, borderRadius: 10, padding: 8, whiteSpace: 'nowrap', fontSize: 12 }}>
                   {month.label}
                 </div>
               ))}
@@ -540,7 +540,7 @@ export default function TimelinePage() {
                         border: `1px solid ${cell.borderColor}`,
                         borderRadius: 10,
                         padding: 8,
-                        color: '#0f172a',
+                        color: 'var(--timeline-text)',
                         fontSize: 12,
                         minHeight: 56,
                         textAlign: 'center',
@@ -548,14 +548,14 @@ export default function TimelinePage() {
                       }}
                     >
                       <div>{cell.content}</div>
-                      {cell.sub && <div style={{ marginTop: 2, color: '#667085' }}>{cell.sub}</div>}
+                      {cell.sub && <div style={{ marginTop: 2, color: 'var(--timeline-muted)' }}>{cell.sub}</div>}
                     </button>
                   );
                 })}
               </div>
             ))}
             {!visibleItems.length && (
-              <div style={{ color: '#667085', fontSize: 12, padding: 16 }}>请在左侧选择一个项目，或点击“添加项目”。</div>
+              <div style={{ color: 'var(--timeline-muted)', fontSize: 12, padding: 16 }}>请在左侧选择一个项目，或点击“添加项目”。</div>
             )}
           </div>
         </div>
@@ -563,7 +563,7 @@ export default function TimelinePage() {
 
       {dialogOpen && (
         <div style={{ position: 'fixed', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,.35)', zIndex: 9999 }} onClick={(e) => { if (e.target === e.currentTarget) setDialogOpen(false); }}>
-          <div style={{ width: 'min(680px,92vw)', maxHeight: '92vh', overflow: 'auto', background: '#fff', borderRadius: 14, padding: 14, boxShadow: '0 12px 32px rgba(0,0,0,.18)' }}>
+          <div style={{ width: 'min(680px,92vw)', maxHeight: '92vh', overflow: 'auto', background: 'var(--timeline-card)', color: 'var(--timeline-text)', borderRadius: 14, padding: 14, boxShadow: '0 12px 32px rgba(0,0,0,.18)' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
               <h3 style={{ margin: 0 }}>{editingId ? '编辑项目' : '新增项目'}</h3>
               <button style={buttonBase} onClick={() => setDialogOpen(false)}>×</button>
@@ -583,9 +583,9 @@ export default function TimelinePage() {
             </div>
 
             <div style={{ display: 'flex', gap: 10, marginTop: 8, alignItems: 'center', flexWrap: 'wrap' }}>
-              <label style={{ fontSize: 12, color: '#667085' }}>开始日</label>
+              <label style={{ fontSize: 12, color: 'var(--timeline-muted)' }}>开始日</label>
               <input type="date" style={{ ...inputStyle, width: 140 }} value={draft.start_date || ''} onChange={(e) => patchDraft({ start_date: e.target.value })} />
-              <label style={{ fontSize: 12, color: '#667085' }}>货币</label>
+              <label style={{ fontSize: 12, color: 'var(--timeline-muted)' }}>货币</label>
               <select style={{ ...inputStyle, width: 120 }} value={draft.currency || 'CNY'} onChange={(e) => patchDraft({ currency: e.target.value })}>
                 <option value="CNY">CNY ￥</option>
                 <option value="JPY">JPY ¥</option>
@@ -602,14 +602,14 @@ export default function TimelinePage() {
             {showPlanBlock && (
               <>
                 <div style={{ display: 'flex', gap: 10, marginTop: 8, alignItems: 'center', flexWrap: 'wrap' }}>
-                  <label style={{ fontSize: 12, color: '#667085' }}>周期</label>
+                  <label style={{ fontSize: 12, color: 'var(--timeline-muted)' }}>周期</label>
                   <select style={{ ...inputStyle, width: 120 }} value={draft.cycle || 'monthly'} onChange={(e) => patchDraft({ cycle: e.target.value as Cycle })}>
                     <option value="monthly">月度</option>
                     <option value="yearly">年次</option>
                   </select>
                   {showFiscal && (
                     <>
-                      <label style={{ fontSize: 12, color: '#667085' }}>决算月</label>
+                      <label style={{ fontSize: 12, color: 'var(--timeline-muted)' }}>决算月</label>
                       <select style={{ ...inputStyle, width: 120 }} value={draft.fiscal_month || 1} onChange={(e) => patchDraft({ fiscal_month: Number(e.target.value) })}>
                         {Array.from({ length: 12 }, (_, i) => <option key={i + 1} value={i + 1}>{i + 1}</option>)}
                       </select>
@@ -617,32 +617,32 @@ export default function TimelinePage() {
                   )}
                 </div>
 
-                <fieldset style={{ border: '1px dashed #eef0f3', borderRadius: 10, padding: 8, marginTop: 6 }}>
-                  <legend style={{ fontSize: 12, color: '#667085' }}>金额（从第 X 个月起，金额 / 月）</legend>
+                <fieldset style={{ border: '1px dashed var(--timeline-line)', borderRadius: 10, padding: 8, marginTop: 6 }}>
+                  <legend style={{ fontSize: 12, color: 'var(--timeline-muted)' }}>金额（从第 X 个月起，金额 / 月）</legend>
                   {(draft.price_phases || []).map((phase, index) => (
                     <div key={index} style={{ display: 'flex', gap: 8, alignItems: 'center', margin: '6px 0', flexWrap: 'wrap' }}>
-                      <span style={{ fontSize: 12, color: '#667085' }}>第</span>
+                      <span style={{ fontSize: 12, color: 'var(--timeline-muted)' }}>第</span>
                       <input type="number" min={1} style={{ ...inputStyle, width: 60 }} value={phase.fromMonth} onChange={(e) => setPhase(index, { fromMonth: Number(e.target.value) || 1 })} />
-                      <span style={{ fontSize: 12, color: '#667085' }}>个月起</span>
+                      <span style={{ fontSize: 12, color: 'var(--timeline-muted)' }}>个月起</span>
                       <input type="number" step="0.01" style={{ ...inputStyle, width: 100 }} value={phase.amount} onChange={(e) => setPhase(index, { amount: Number(e.target.value) || 0 })} />
-                      <span style={{ fontSize: 12, color: '#667085' }}>/月</span>
-                      <button style={{ ...buttonBase, width: 34, height: 34, borderRadius: '50%', padding: 0, background: '#fff0f0', color: '#d93025', border: '1px solid #f5c6cb' }} onClick={() => patchDraft({ price_phases: (draft.price_phases || []).filter((_, i) => i !== index) })}>−</button>
+                      <span style={{ fontSize: 12, color: 'var(--timeline-muted)' }}>/月</span>
+                      <button style={{ ...buttonBase, width: 34, height: 34, borderRadius: '50%', padding: 0, background: 'rgba(239,68,68,0.12)', color: '#d93025', border: '1px solid rgba(239,68,68,0.28)' }} onClick={() => patchDraft({ price_phases: (draft.price_phases || []).filter((_, i) => i !== index) })}>−</button>
                     </div>
                   ))}
                   <button style={{ ...buttonBase, width: 34, height: 34, borderRadius: '50%', padding: 0, background: '#e6f7ff', color: '#1890ff', border: '1px solid #b0dfff' }} onClick={() => patchDraft({ price_phases: [...(draft.price_phases || []), { fromMonth: 1, amount: 0 }] })}>＋</button>
                 </fieldset>
 
                 {currentType !== 'insurance' && (
-                  <fieldset style={{ border: '1px dashed #eef0f3', borderRadius: 10, padding: 8, marginTop: 6 }}>
-                    <legend style={{ fontSize: 12, color: '#667085' }}>退会（从第 X ～ 第 Y 个月为退会期）</legend>
+                  <fieldset style={{ border: '1px dashed var(--timeline-line)', borderRadius: 10, padding: 8, marginTop: 6 }}>
+                    <legend style={{ fontSize: 12, color: 'var(--timeline-muted)' }}>退会（从第 X ～ 第 Y 个月为退会期）</legend>
                     {(draft.cancel_windows || []).map((window, index) => (
                       <div key={index} style={{ display: 'flex', gap: 8, alignItems: 'center', margin: '6px 0', flexWrap: 'wrap' }}>
-                        <span style={{ fontSize: 12, color: '#667085' }}>第</span>
+                        <span style={{ fontSize: 12, color: 'var(--timeline-muted)' }}>第</span>
                         <input type="number" min={1} style={{ ...inputStyle, width: 60 }} value={window.fromMonth} onChange={(e) => setCancelWindow(index, { fromMonth: Number(e.target.value) || 1 })} />
-                        <span style={{ fontSize: 12, color: '#667085' }}>-</span>
+                        <span style={{ fontSize: 12, color: 'var(--timeline-muted)' }}>-</span>
                         <input type="number" min={1} style={{ ...inputStyle, width: 60 }} value={window.toMonth} onChange={(e) => setCancelWindow(index, { toMonth: Number(e.target.value) || 1 })} />
-                        <span style={{ fontSize: 12, color: '#667085' }}>个月</span>
-                        <button style={{ ...buttonBase, width: 34, height: 34, borderRadius: '50%', padding: 0, background: '#fff0f0', color: '#d93025', border: '1px solid #f5c6cb' }} onClick={() => patchDraft({ cancel_windows: (draft.cancel_windows || []).filter((_, i) => i !== index) })}>−</button>
+                        <span style={{ fontSize: 12, color: 'var(--timeline-muted)' }}>个月</span>
+                        <button style={{ ...buttonBase, width: 34, height: 34, borderRadius: '50%', padding: 0, background: 'rgba(239,68,68,0.12)', color: '#d93025', border: '1px solid rgba(239,68,68,0.28)' }} onClick={() => patchDraft({ cancel_windows: (draft.cancel_windows || []).filter((_, i) => i !== index) })}>−</button>
                       </div>
                     ))}
                     <button style={{ ...buttonBase, width: 34, height: 34, borderRadius: '50%', padding: 0, background: '#e6f7ff', color: '#1890ff', border: '1px solid #b0dfff' }} onClick={() => patchDraft({ cancel_windows: [...(draft.cancel_windows || []), { fromMonth: 1, toMonth: 1 }] })}>＋</button>
@@ -651,7 +651,7 @@ export default function TimelinePage() {
 
                 {currentType === 'insurance' && (
                   <div style={{ marginTop: 8, display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
-                    <label style={{ fontSize: 12, color: '#667085' }}>保期</label>
+                    <label style={{ fontSize: 12, color: 'var(--timeline-muted)' }}>保期</label>
                     <input type="number" min={0} placeholder="年" style={{ ...inputStyle, width: 80 }} value={draft.policy_term_years ?? ''} onChange={(e) => patchDraft({ policy_term_years: Number(e.target.value) || 0 })} />
                     <input type="number" min={0} max={11} placeholder="月" style={{ ...inputStyle, width: 80 }} value={draft.policy_term_months ?? ''} onChange={(e) => patchDraft({ policy_term_months: Number(e.target.value) || 0 })} />
                   </div>
@@ -661,7 +661,7 @@ export default function TimelinePage() {
 
             {currentType === 'warranty' && (
               <div style={{ marginTop: 8, display: 'flex', gap: 8, alignItems: 'center' }}>
-                <label style={{ fontSize: 12, color: '#667085' }}>保修期（月）</label>
+                <label style={{ fontSize: 12, color: 'var(--timeline-muted)' }}>保修期（月）</label>
                 <input type="number" min={0} style={{ ...inputStyle, width: 120 }} value={draft.warranty_months ?? 24} onChange={(e) => patchDraft({ warranty_months: Number(e.target.value) || 0 })} />
               </div>
             )}
@@ -669,7 +669,7 @@ export default function TimelinePage() {
             {msg && <div style={{ fontSize: 12, color: '#ef4444', marginTop: 10, textAlign: 'right' }}>{msg}</div>}
 
             <div style={{ display: 'flex', gap: 8, justifyContent: 'space-between', marginTop: 12 }}>
-              {editingId && <button style={{ ...buttonBase, color: '#d93025', background: '#fff0f0', border: '1px solid #f5c6cb' }} onClick={deleteItem}>删除</button>}
+              {editingId && <button style={{ ...buttonBase, color: '#d93025', background: 'rgba(239,68,68,0.12)', border: '1px solid rgba(239,68,68,0.28)' }} onClick={deleteItem}>删除</button>}
               <div style={{ display: 'flex', gap: 8, marginLeft: 'auto' }}>
                 <button style={buttonBase} onClick={() => setDialogOpen(false)}>取消</button>
                 <button style={primaryButton} onClick={saveItem}>保存</button>
