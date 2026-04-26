@@ -5,15 +5,15 @@ import { usePathname } from 'next/navigation';
 import { useEffect, useMemo, useState } from 'react';
 
 const NAV = [
-  { href: '/tracker', label: 'game-test-tracker', hint: '测试记录' },
-  { href: '/timeline', label: 'timeline3', hint: '费用时间轴' },
-  { href: '/board', label: 'NullPage', hint: '文本板' },
-  { href: '/vault', label: 'password-vault2', hint: '密码库' },
+  { href: '/tracker', label: '测试记录' },
+  { href: '/timeline', label: '费用时间轴' },
+  { href: '/board', label: '文本板' },
+  { href: '/vault', label: '密码库' },
 ];
 
 type Theme = 'dark' | 'light';
 
-export function Shell({ children }: { children: React.ReactNode }) {
+export function Shell({ children, siteName }: { children: React.ReactNode; siteName: string }) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const [theme, setTheme] = useState<Theme>('dark');
@@ -48,14 +48,13 @@ export function Shell({ children }: { children: React.ReactNode }) {
       <header className="topbar">
         <div className="topbar-inner">
           <div className="brand">
-            <div className="title">Kuma Suite</div>
-            <div className="subtitle">{active.label} · {active.hint}</div>
+            <div className="title">{siteName}</div>
+            <div className="subtitle">{active.label}</div>
           </div>
           <nav className="desktop-nav" aria-label="主导航">
             {NAV.map((item) => (
               <Link key={item.href} href={item.href} className={`nav-link ${pathname === item.href ? 'active' : ''}`}>
                 <span>{item.label}</span>
-                <span className="tiny muted">{item.hint}</span>
               </Link>
             ))}
           </nav>
@@ -70,7 +69,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
           <div className="mobile-menu-panel">
             {NAV.map((item) => (
               <Link key={item.href} href={item.href} className={pathname === item.href ? 'active' : ''}>
-                {item.label} <span className="muted tiny">· {item.hint}</span>
+                {item.label}
               </Link>
             ))}
             <button type="button" onClick={toggleTheme}>

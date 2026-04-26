@@ -2,8 +2,10 @@ import './globals.css';
 import type { Metadata } from 'next';
 import { Shell } from '@/components/Shell';
 
+const siteName = process.env.SITE_NAME || process.env.NEXT_PUBLIC_SITE_NAME || 'Xiler Suite';
+
 export const metadata: Metadata = {
-  title: 'Kuma Suite',
+  title: siteName,
   description: 'Unified personal workspace',
 };
 
@@ -26,7 +28,7 @@ try {
         />
       </head>
       <body>
-        <Shell>{children}</Shell>
+        <Shell siteName={siteName}>{children}</Shell>
       </body>
     </html>
   );
