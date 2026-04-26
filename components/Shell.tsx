@@ -14,6 +14,7 @@ const NAV = [
 export function Shell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
+  const isTimeline = pathname === '/timeline';
 
   const active = useMemo(() => {
     return NAV.find((item) => item.href === pathname) ?? NAV[0];
@@ -22,6 +23,14 @@ export function Shell({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     setOpen(false);
   }, [pathname]);
+
+  if (isTimeline) {
+    return (
+      <div style={{ minHeight: '100vh', background: '#f6f8fb' }}>
+        <main>{children}</main>
+      </div>
+    );
+  }
 
   return (
     <div className="app-shell">
