@@ -187,19 +187,39 @@ function EditModal({
             </div>
           </div>
 
-          {/* Row 3: work_time + payment */}
-          <div style={{ display: 'flex', gap: 14, marginBottom: 12 }}>
+          {/* Row 3: work_time + income1 + received_date1 */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: 14, marginBottom: 12 }}>
             <div style={groupStyle}>
               <label style={labelStyle}>工时</label>
               <input style={inputStyle} value={form.work_time} onChange={set('work_time')} />
             </div>
             <div style={groupStyle}>
-              <label style={labelStyle}>支付方式</label>
-              <input style={inputStyle} value={form.payment} onChange={set('payment')} />
+              <label style={labelStyle}>收入1</label>
+              <input style={inputStyle} value={form.income1} onChange={set('income1')} />
+            </div>
+            <div style={groupStyle}>
+              <label style={labelStyle}>收款日1</label>
+              <input type="date" style={inputStyle} value={form.received_date1} onChange={set('received_date1')} />
             </div>
           </div>
 
-          {/* Row 4: test_case + test_result */}
+          {/* Row 4: payment + income2 + received_date2 */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: 14, marginBottom: 12 }}>
+            <div style={groupStyle}>
+              <label style={labelStyle}>支付</label>
+              <input style={inputStyle} value={form.payment} onChange={set('payment')} />
+            </div>
+            <div style={groupStyle}>
+              <label style={labelStyle}>收入2</label>
+              <input style={inputStyle} value={form.income2} onChange={set('income2')} />
+            </div>
+            <div style={groupStyle}>
+              <label style={labelStyle}>收款日2</label>
+              <input type="date" style={inputStyle} value={form.received_date2} onChange={set('received_date2')} />
+            </div>
+          </div>
+
+          {/* Row 5: test_case + test_result */}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: 14, marginBottom: 12 }}>
             <div style={groupStyle}>
               <label style={labelStyle}>Test Case</label>
@@ -213,30 +233,10 @@ function EditModal({
             </div>
           </div>
 
-          {/* Row 5: gamepack */}
+          {/* Row 6: gamepack */}
           <div style={{ marginBottom: 12 }}>
             <label style={labelStyle}>Gamepack</label>
             <input style={inputStyle} value={form.gamepack} onChange={set('gamepack')} />
-          </div>
-
-          {/* Row 6: income fields */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', gap: 14, marginBottom: 12 }}>
-            <div style={groupStyle}>
-              <label style={labelStyle}>收入1</label>
-              <input style={inputStyle} value={form.income1} onChange={set('income1')} />
-            </div>
-            <div style={groupStyle}>
-              <label style={labelStyle}>收款日1</label>
-              <input type="date" style={inputStyle} value={form.received_date1} onChange={set('received_date1')} />
-            </div>
-            <div style={groupStyle}>
-              <label style={labelStyle}>收入2</label>
-              <input style={inputStyle} value={form.income2} onChange={set('income2')} />
-            </div>
-            <div style={groupStyle}>
-              <label style={labelStyle}>收款日2</label>
-              <input type="date" style={inputStyle} value={form.received_date2} onChange={set('received_date2')} />
-            </div>
           </div>
 
           {status && (
