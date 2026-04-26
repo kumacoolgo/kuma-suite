@@ -87,18 +87,34 @@ export default function VaultPage() {
           </div>
         </div>
         <div className="panel-body grid">
-          <div className="stack">
-            <div className="card-list">
+          <div className="stack" style={{ alignSelf: 'start' }}>
+            <div className="card-list" style={{ alignContent: 'start', alignItems: 'start' }}>
               {filtered.map((item) => (
-                <button key={item.id} className={`card ${selectedId === item.id ? 'active' : ''}`} onClick={() => setSelectedId(item.id)} style={{ textAlign: 'left' }}>
-                  <div className="card-head">
-                    <div>
-                      <div style={{ fontWeight: 800 }}>{item.category || '未分类'}</div>
-                      <div className="muted tiny">{item.url}</div>
+                <button
+                  key={item.id}
+                  className={`card ${selectedId === item.id ? 'active' : ''}`}
+                  onClick={() => setSelectedId(item.id)}
+                  style={{
+                    width: '100%',
+                    minHeight: 86,
+                    textAlign: 'left',
+                    alignItems: 'stretch',
+                  }}
+                >
+                  <div className="card-head" style={{ alignItems: 'flex-start' }}>
+                    <div style={{ minWidth: 0 }}>
+                      <div style={{ fontWeight: 800, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                        {item.category || '未分类'}
+                      </div>
+                      <div className="muted tiny" style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                        {item.url}
+                      </div>
                     </div>
-                    <div className="badge">{due(item) || '无到期日'}</div>
+                    <div className="badge" style={{ flexShrink: 0 }}>{due(item) || '无到期日'}</div>
                   </div>
-                  <div className="muted tiny">{item.username || '无用户名'}</div>
+                  <div className="muted tiny" style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    {item.username || '无用户名'}
+                  </div>
                 </button>
               ))}
               {!filtered.length && <div className="empty">没有匹配的条目。</div>}
