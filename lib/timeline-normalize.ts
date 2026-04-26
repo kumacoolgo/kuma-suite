@@ -1,22 +1,31 @@
 export function normalizeTimelineItem(raw: any, includeId = false) {
+  const startDate = raw.start_date ?? raw.startDate;
+  const billingDay = raw.billing_day ?? raw.billingDay;
+  const fiscalMonth = raw.fiscal_month ?? raw.fiscalMonth;
+  const pricePhases = raw.price_phases ?? raw.pricePhases;
+  const cancelWindows = raw.cancel_windows ?? raw.cancelWindows;
+  const warrantyMonths = raw.warranty_months ?? raw.warrantyMonths;
+  const policyTermYears = raw.policy_term_years ?? raw.policyTermYears;
+  const policyTermMonths = raw.policy_term_months ?? raw.policyTermMonths;
+  const balanceFrom = raw.balance_from ?? raw.balanceFrom;
   const base = {
     type: raw.type,
     name: String(raw.name ?? '').trim(),
     number: raw.number ?? null,
-    start_date: String(raw.start_date ?? '').slice(0, 10),
+    start_date: String(startDate ?? '').slice(0, 10),
     currency: String(raw.currency ?? 'CNY').toUpperCase(),
     category: raw.category ?? null,
     tags: Array.isArray(raw.tags) ? raw.tags.map(String) : [],
-    billing_day: raw.billing_day == null || raw.billing_day === '' ? null : Number(raw.billing_day),
+    billing_day: billingDay == null || billingDay === '' ? null : Number(billingDay),
     cycle: raw.cycle === 'yearly' ? 'yearly' : ('monthly' as const),
-    fiscal_month: raw.fiscal_month == null || raw.fiscal_month === '' ? null : Number(raw.fiscal_month),
-    price_phases: Array.isArray(raw.price_phases) ? raw.price_phases : [],
-    cancel_windows: Array.isArray(raw.cancel_windows) ? raw.cancel_windows : [],
-    warranty_months: raw.warranty_months == null || raw.warranty_months === '' ? null : Number(raw.warranty_months),
-    policy_term_years: raw.policy_term_years == null || raw.policy_term_years === '' ? null : Number(raw.policy_term_years),
-    policy_term_months: raw.policy_term_months == null || raw.policy_term_months === '' ? null : Number(raw.policy_term_months),
+    fiscal_month: fiscalMonth == null || fiscalMonth === '' ? null : Number(fiscalMonth),
+    price_phases: Array.isArray(pricePhases) ? pricePhases : [],
+    cancel_windows: Array.isArray(cancelWindows) ? cancelWindows : [],
+    warranty_months: warrantyMonths == null || warrantyMonths === '' ? null : Number(warrantyMonths),
+    policy_term_years: policyTermYears == null || policyTermYears === '' ? null : Number(policyTermYears),
+    policy_term_months: policyTermMonths == null || policyTermMonths === '' ? null : Number(policyTermMonths),
     balance: raw.balance == null || raw.balance === '' ? null : Number(raw.balance),
-    balance_from: raw.balance_from == null || raw.balance_from === '' ? null : Number(raw.balance_from),
+    balance_from: balanceFrom == null || balanceFrom === '' ? null : Number(balanceFrom),
   };
   return includeId ? { id: raw.id, ...base } : base;
 }
