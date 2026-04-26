@@ -344,6 +344,20 @@ export default function TrackerPage() {
     }
   }
 
+  async function handleDeleteAll() {
+    if (tasks.length === 0) return;
+    if (!confirm(`确定删除全部 ${tasks.length} 条游戏测试记录？此操作不可恢复。`)) return;
+    try {
+      await apiJson('/api/tracker', { method: 'DELETE' });
+      setSelectedId(null);
+      setExpandedId(null);
+      await loadTasks();
+      showStatus('已删除全部记录');
+    } catch (e: unknown) {
+      showStatus(e instanceof Error ? e.message : String(e), true);
+    }
+  }
+
   async function handleReorder(dir: 'up' | 'down') {
     if (!selectedId) return;
     try {
@@ -401,6 +415,10 @@ export default function TrackerPage() {
         <button style={{ ...btnBase, background: '#da3633', borderColor: '#da3633', opacity: selectedId === null ? 0.4 : 1, cursor: selectedId === null ? 'not-allowed' : 'pointer' }}
           disabled={selectedId === null} onClick={handleDelete}>
           删除
+        </button>
+        <button style={{ ...btnBase, background: '#7f1d1d', borderColor: '#991b1b', opacity: tasks.length === 0 ? 0.4 : 1, cursor: tasks.length === 0 ? 'not-allowed' : 'pointer' }}
+          disabled={tasks.length === 0} onClick={handleDeleteAll}>
+          全部删除
         </button>
         <button style={{ ...btnBase, opacity: (selectedId === null || selectedIdx <= 0) ? 0.4 : 1, cursor: (selectedId === null || selectedIdx <= 0) ? 'not-allowed' : 'pointer' }}
           disabled={selectedId === null || selectedIdx <= 0} onClick={() => handleReorder('up')}>

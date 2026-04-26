@@ -29,3 +29,8 @@ export const POST = withErrorHandler(async (req: Request) => {
   });
   return NextResponse.json({ item });
 });
+
+export const DELETE = withErrorHandler(async () => {
+  await dbQuery('DELETE FROM tracker_tasks');
+  return NextResponse.json({ ok: true });
+});
