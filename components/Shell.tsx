@@ -17,7 +17,6 @@ export function Shell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const [theme, setTheme] = useState<Theme>('dark');
-  const isTimeline = pathname === '/timeline';
 
   const active = useMemo(() => {
     return NAV.find((item) => item.href === pathname) ?? NAV[0];
@@ -43,14 +42,6 @@ export function Shell({ children }: { children: React.ReactNode }) {
   }
 
   const themeLabel = theme === 'dark' ? '浅色' : '深色';
-
-  if (isTimeline) {
-    return (
-      <div style={{ minHeight: '100vh', background: 'var(--timeline-bg)' }}>
-        <main>{children}</main>
-      </div>
-    );
-  }
 
   return (
     <div className="app-shell">

@@ -121,7 +121,7 @@ export default function VaultPage() {
             </div>
           </div>
 
-          <div className="panel" style={{ background: 'rgba(10,15,28,.82)' }}>
+          <div className="panel">
             <div className="panel-head">
               <h3>{selectedId ? '编辑条目' : '新建条目'}</h3>
               <div className="actions">

@@ -20,6 +20,24 @@
   --nav-bg: rgba(11, 16, 32, 0.68);
   --input-bg: rgba(8, 13, 26, 0.88);
   --button-bg: rgba(13, 19, 36, 0.9);
+  --ghost-bg: rgba(13, 19, 36, 0.52);
+  --primary-bg: linear-gradient(135deg, rgba(109,124,255,0.9), rgba(78,94,255,0.75));
+  --primary-border: rgba(109,124,255,0.6);
+  --primary-text: #ffffff;
+  --danger-bg: rgba(63, 15, 20, 0.82);
+  --danger-border: rgba(255,107,107,0.35);
+  --danger-text: #ffd1d1;
+  --tracker-surface: rgba(16, 24, 40, 0.9);
+  --tracker-surface-2: rgba(8, 13, 26, 0.88);
+  --tracker-header: rgba(10, 15, 28, 0.95);
+  --tracker-line: rgba(148, 163, 184, 0.22);
+  --tracker-text: #e5eefc;
+  --tracker-muted: #98a2b3;
+  --tracker-accent: #7aa7ff;
+  --tracker-value: #78ffd6;
+  --tracker-detail-bg: rgba(8, 13, 26, 0.74);
+  --tracker-selected: rgba(109, 124, 255, 0.16);
+  --tracker-empty: #667085;
   --timeline-bg: #f6f8fb;
   --timeline-card: #ffffff;
   --timeline-text: #0f172a;
@@ -48,6 +66,24 @@ html[data-theme="light"] {
   --nav-bg: rgba(255, 255, 255, 0.86);
   --input-bg: rgba(255, 255, 255, 0.94);
   --button-bg: rgba(255, 255, 255, 0.92);
+  --ghost-bg: rgba(255, 255, 255, 0.7);
+  --primary-bg: linear-gradient(135deg, #3b82f6, #6366f1);
+  --primary-border: rgba(59, 130, 246, 0.5);
+  --primary-text: #ffffff;
+  --danger-bg: #fee2e2;
+  --danger-border: #fecaca;
+  --danger-text: #991b1b;
+  --tracker-surface: rgba(255, 255, 255, 0.94);
+  --tracker-surface-2: rgba(255, 255, 255, 0.98);
+  --tracker-header: #f8fafc;
+  --tracker-line: rgba(15, 23, 42, 0.14);
+  --tracker-text: #0f172a;
+  --tracker-muted: #64748b;
+  --tracker-accent: #3b82f6;
+  --tracker-value: #0f766e;
+  --tracker-detail-bg: #f8fafc;
+  --tracker-selected: rgba(59, 130, 246, 0.12);
+  --tracker-empty: #94a3b8;
   --timeline-bg: #f6f8fb;
   --timeline-card: #ffffff;
   --timeline-text: #0f172a;
@@ -211,9 +247,9 @@ textarea { min-height: 220px; resize: vertical; }
   display: inline-flex; align-items: center; justify-content: center;
   gap: 0.45rem; min-height: 42px;
 }
-.btn.primary { background: linear-gradient(135deg, rgba(109,124,255,0.9), rgba(78,94,255,0.75)); border-color: rgba(109,124,255,0.6); }
-.btn.ghost { background: rgba(13, 19, 36, 0.52); }
-.btn.danger { background: rgba(63, 15, 20, 0.82); border-color: rgba(255,107,107,0.35); }
+.btn.primary { background: var(--primary-bg); border-color: var(--primary-border); color: var(--primary-text); }
+.btn.ghost { background: var(--ghost-bg); }
+.btn.danger { background: var(--danger-bg); border-color: var(--danger-border); color: var(--danger-text); }
 .btn.small { padding: 0.55rem 0.75rem; min-height: 36px; border-radius: 10px; font-size: 0.9rem; }
 .btn:disabled { opacity: 0.5; cursor: not-allowed; }
 .table { width: 100%; border-collapse: collapse; }
