@@ -431,7 +431,7 @@ export default function TimelinePage() {
   const showFiscal = showPlanBlock && draft.cycle === 'yearly';
 
   return (
-    <div style={{ maxWidth: 1200, margin: '18px auto', padding: '0 12px', color: 'var(--timeline-text)' }}>
+    <div className="page stack" style={{ color: 'var(--timeline-text)' }}>
       {loading && (
         <div style={{ position: 'fixed', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(255,255,255,.45)', zIndex: 10000 }}>
           <div style={{ width: 40, height: 40, border: '4px solid var(--timeline-line)', borderTopColor: '#3b82f6', borderRadius: '50%' }} />

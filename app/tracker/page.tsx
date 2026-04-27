@@ -403,7 +403,7 @@ export default function TrackerPage() {
   };
 
   return (
-    <div style={{ padding: 30, maxWidth: 1800, margin: '0 auto' }}>
+    <div className="page stack">
       {/* Toolbar */}
       <div style={{ display: 'flex', gap: 12, marginBottom: 24, flexWrap: 'wrap' }}>
         <button style={btnBase} onClick={() => { setModalTask(null); setModalStatus(''); }}>+ 新建</button>
